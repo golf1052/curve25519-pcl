@@ -1,5 +1,5 @@
 ﻿/** 
- * Copyright (C) 2015 langboost
+ * Copyright (C) 2016 langboost, golf1052
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,5 +36,7 @@ namespace org.whispersystems.curve25519
         public abstract void setRandomProvider(SecureRandomProvider provider);
         public abstract void setSha512Provider(ISha512 provider);
         public abstract bool verifySignature(byte[] publicKey, byte[] message, byte[] signature);
+        public abstract byte[] calculateUniqueSignature(byte[] random, byte[] privateKey, byte[] message);
+        public abstract bool verifyUniqueSignature(byte[] publicKey, byte[] message, byte[] signature);
     }
 }

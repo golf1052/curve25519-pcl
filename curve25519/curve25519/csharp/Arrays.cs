@@ -1,5 +1,5 @@
 ﻿/** 
- * Copyright (C) 2015 langboost
+ * Copyright (C) 2016 langboost, golf1052
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,5 +33,34 @@ namespace org.whispersystems.curve25519.csharp
                 a[i] = val;
         }
 
+        /// <summary>
+        /// This is a timing attack resistant implementation of MessageDigest.isEqual(). According to
+        /// https://codahale.com/a-lesson-in-timing-attacks/ , this helper method in the Java
+        /// environment is vulnerable to timing attacks.
+        /// </summary>
+        public static bool isEqual(byte[] first, byte[] second)
+        {
+            if (first.Length != second.Length)
+            {
+                return false;
+            }
+
+            int result = 0;
+            for (int i = 0; i < first.Length; i++)
+            {
+                result |= first[i] ^ second[i];
+            }
+            return result == 0;
+        }
+
+        public static bool isEqual(byte[] first, byte[] second, int length)
+        {
+            int result = 0;
+            for (int i = 0; i < length; i++)
+            {
+                result |= first[i] ^ second[i];
+            }
+            return result == 0;
+        }
     }
 }

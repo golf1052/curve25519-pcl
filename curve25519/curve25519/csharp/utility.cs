@@ -1,5 +1,5 @@
 ﻿/** 
- * Copyright (C) 2016 langboost, golf1052
+ * Copyright (C) 2016 golf1052
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,32 +15,34 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using System.Diagnostics;
+
 namespace org.whispersystems.curve25519.csharp
 {
-
-    public class Fe_isnonzero
+    public class utility
     {
-
-        //CONVERT #include "fe.h"
-        //CONVERT #include "crypto_verify_32.crypto_verify_32.h"
-
-        /*
-        return nonzero if f == 0
-        return 0 if f != 0
-
-        Preconditions:
-           |f| bounded by 1.1*2^26,1.1*2^25,1.1*2^26,1.1*2^25,etc.
-        */
-
-        static readonly byte[] zero = new byte[32];
-
-        public static int fe_isnonzero(int[] f)
+        public static void print_vector(string name, byte[] v)
         {
-            byte[] s = new byte[32];
-            Fe_tobytes.fe_tobytes(s, f);
-            return Crypto_verify_32.crypto_verify_32(s, zero);
+            int count;
+            Debug.WriteLine($"{name} = ");
+            for (count = 0; count < 32; count++)
+            {
+                Debug.WriteLine("{0:X2}", v[count]);
+            }
+            Debug.WriteLine("");
         }
 
+        public static void print_fe(string name, int[] iIn)
+        {
+            byte[] bytes = new byte[32];
+            Fe_tobytes.fe_tobytes(bytes, iIn);
+            print_vector(name, bytes);
+        }
 
+        public static void print_error(string error)
+        {
+            Debug.WriteLine($"ERROR: {error}");
+            Debug.WriteLine("abort()");
+        }
     }
 }

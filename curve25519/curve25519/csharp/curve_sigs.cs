@@ -1,5 +1,5 @@
 ﻿/** 
- * Copyright (C) 2015 langboost
+ * Copyright (C) 2016 langboost, golf1052
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,40 +22,6 @@ namespace org.whispersystems.curve25519.csharp
 
     public class Curve_sigs
     {
-
-        public static void curve25519_keygen(byte[] curve25519_pubkey_out,
-                               byte[] curve25519_privkey_in)
-        {
-            Ge_p3 ed = new Ge_p3(); /* Ed25519 pubkey point */
-            int[] ed_y = new int[10];
-            int[] ed_y_plus_one = new int[10];
-            int[] one_minus_ed_y = new int[10];
-            int[] inv_one_minus_ed_y = new int[10];
-            int[] mont_x = new int[10];
-
-            /* Perform a fixed-base multiplication of the Edwards base point,
-               (which is efficient due to precalculated tables), then convert
-               to the Curve25519 montgomery-format public key.  In particular,
-               convert Curve25519's "montgomery" x-coordinate into an Ed25519
-               "edwards" y-coordinate:
-
-               mont_x = (ed_y + 1) / (1 - ed_y)
-
-               with projective coordinates:
-
-               mont_x = (ed_y + ed_z) / (ed_z - ed_y)
-
-               NOTE: ed_y=1 is converted to mont_x=0 since fe_invert is mod-exp
-            */
-
-            Ge_scalarmult_base.ge_scalarmult_base(ed, curve25519_privkey_in);
-            Fe_add.fe_add(ed_y_plus_one, ed.Y, ed.Z);
-            Fe_sub.fe_sub(one_minus_ed_y, ed.Z, ed.Y);
-            Fe_invert.fe_invert(inv_one_minus_ed_y, one_minus_ed_y);
-            Fe_mul.fe_mul(mont_x, ed_y_plus_one, inv_one_minus_ed_y);
-            Fe_tobytes.fe_tobytes(curve25519_pubkey_out, mont_x);
-        }
-
         public static int curve25519_sign(ISha512 sha512provider, byte[] signature_out,
                             byte[] curve25519_privkey,
                             byte[] msg, int msg_len,
@@ -87,9 +53,6 @@ namespace org.whispersystems.curve25519.csharp
                               byte[] msg, int msg_len)
         {
             int[] mont_x = new int[10];
-            int[] mont_x_minus_one = new int[10];
-            int[] mont_x_plus_one = new int[10];
-            int[] inv_mont_x_plus_one = new int[10];
             int[] one = new int[10];
             int[] ed_y = new int[10];
             byte[] ed_pubkey = new byte[32];
@@ -108,11 +71,7 @@ namespace org.whispersystems.curve25519.csharp
                Then move the sign bit into the pubkey from the signature.
             */
             Fe_frombytes.fe_frombytes(mont_x, curve25519_pubkey);
-            Fe_1.fe_1(one);
-            Fe_sub.fe_sub(mont_x_minus_one, mont_x, one);
-            Fe_add.fe_add(mont_x_plus_one, mont_x, one);
-            Fe_invert.fe_invert(inv_mont_x_plus_one, mont_x_plus_one);
-            Fe_mul.fe_mul(ed_y, mont_x_minus_one, inv_mont_x_plus_one);
+            Fe_montx_to_edy.fe_montx_to_edy(ed_y, mont_x);
             Fe_tobytes.fe_tobytes(ed_pubkey, ed_y);
 
             /* Copy the sign bit, and remove it from signature */
@@ -129,7 +88,7 @@ namespace org.whispersystems.curve25519.csharp
             /* verifybuf2 = java to next call gets a copy of verifybuf, S gets
                replaced with pubkey for hashing, then the whole thing gets zeroized
                (if bad sig), or contains a copy of msg (good sig) */
-            return Open.crypto_sign_open(sha512provider, verifybuf2, some_retval, verifybuf, 64 + msg_len, ed_pubkey);
+            return open_modified.crypto_sign_open_modified(sha512provider, verifybuf2, some_retval, verifybuf, 64 + msg_len, ed_pubkey);
         }
     }
 }

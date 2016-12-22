@@ -1,5 +1,5 @@
 ﻿/** 
- * Copyright (C) 2015 langboost
+ * Copyright (C) 2016 langboost, golf1052
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -63,7 +63,7 @@ namespace org.whispersystems.curve25519
         public override byte[] generatePublicKey(byte[] privateKey)
         {
             byte[] publicKey = new byte[32];
-            Curve_sigs.curve25519_keygen(publicKey, privateKey);
+            Keygen.curve25519_keygen(publicKey, privateKey);
 
             return publicKey;
         }
@@ -91,7 +91,7 @@ namespace org.whispersystems.curve25519
         {
             byte[] result = new byte[64];
 
-            if (Curve_sigs.curve25519_sign(sha512provider, result, privateKey, message, message.Length, random) != 0)
+            if (uxdsa.uxdsa_sign(sha512provider, result, privateKey, message, message.Length, random) != 0)
             {
                 throw new ArgumentException("Message exceeds max length!");
             }
@@ -102,6 +102,23 @@ namespace org.whispersystems.curve25519
         public override bool verifySignature(byte[] publicKey, byte[] message, byte[] signature)
         {
             return Curve_sigs.curve25519_verify(sha512provider, signature, publicKey, message, message.Length) == 0;
+        }
+
+        public override byte[] calculateUniqueSignature(byte[] random, byte[] privateKey, byte[] message)
+        {
+            byte[] result = new byte[64];
+
+            if (uxdsa.uxdsa_sign(sha512provider, result, privateKey, message, message.Length, random) != 0)
+            {
+                throw new ArgumentException("Signature failed!");
+            }
+
+            return result;
+        }
+
+        public override bool verifyUniqueSignature(byte[] publicKey, byte[] message, byte[] signature)
+        {
+            return uxdsa.uxdsa_verify(sha512provider, signature, publicKey, message, message.Length) == 0;
         }
 
         public override byte[] getRandom(int length)
