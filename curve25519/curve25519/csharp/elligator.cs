@@ -41,15 +41,15 @@ namespace org.whispersystems.curve25519.csharp
             return 1 & bytes[31];
         }
 
-        public static void elligator(int[] mont_x, int[] iIn)
+        public static void elligator(int[] u, int[] r)
         {
-            /* r = in
-             * v = -A/(1+2r^2)
-             * e = (v^3 + Av^2 + v)^((q-1)/2) # legendre symbol
-             * if e == 1 (square) or e == 0 (because v == 0 and 2r^2 + 1 == 0)
-             *   out = v
+            /* r = input
+             * x = -A/(1+2r^2)                  # 2 is nonsquare
+             * e = (x^3 + Ax^2 + x)^((q-1)/2)   # legendre symbol
+             * if e == 1 (square) or e == 0 (because x == 0 and 2r^2 + 1 == 0)
+             *   u = x
              * if e == -1 (nonsquare)
-             *   out = -v - A
+             *   u = -x - A
              */
 
             int[] A = new int[10];
@@ -57,87 +57,62 @@ namespace org.whispersystems.curve25519.csharp
             int[] twor2 = new int[10];
             int[] twor2plus1 = new int[10];
             int[] twor2plus1inv = new int[10];
-            int[] v = new int[10];
-            int[] v2 = new int[10];
-            int[] v3 = new int[10];
-            int[] Av2 = new int[10];
+            int[] x = new int[10];
             int[] e = new int[10];
-            int[] u = new int[10];
             int[] Atemp = new int[10];
             int[] uneg = new int[10];
             int nonsquare;
 
-            Fe_0.fe_0(one);
-            one[0] = 1;                                         /* 1 */
+            Fe_1.fe_1(one);
             Fe_0.fe_0(A);
             A[0] = 486662;                                      /* A = 486662 */
 
-            Fe_sq2.fe_sq2(twor2, iIn);                          /* 2r^2 */
+            Fe_sq2.fe_sq2(twor2, r);                            /* 2r^2 */
             Fe_add.fe_add(twor2plus1, twor2, one);              /* 1+2r^2 */
             Fe_invert.fe_invert(twor2plus1inv, twor2plus1);     /* 1/(1+2r^2) */
-            Fe_mul.fe_mul(v, twor2plus1inv, A);                 /* A/(1+2r^2) */
-            Fe_neg.fe_neg(v, v);                                /* v = -A/(1+2r^2) */
+            Fe_mul.fe_mul(x, twor2plus1inv, A);                 /* A/(1+2r^2) */
+            Fe_neg.fe_neg(x, x);                                /* x = -A/(1+2r^2) */
 
-            Fe_sq.fe_sq(v2, v);                                 /* v^2 */
-            Fe_mul.fe_mul(v3, v2, v);                           /* v^3 */
-            Fe_mul.fe_mul(Av2, v2, A);                          /* Av^2 */
-            Fe_add.fe_add(e, v3, Av2);                          /* v^3 + Av^2 */
-            Fe_add.fe_add(e, e, v);                             /* v^3 + Av^2 + v */
+            Fe_mont_rhs.fe_mont_rhs(e, x);                      /* e = x^3 + Ax^2 + x */
             nonsquare = legendre_is_nonsquare(e);
 
             Fe_0.fe_0(Atemp);
             Fe_cmov.fe_cmov(Atemp, A, nonsquare);               /* 0, or A if nonsquare */
-            Fe_add.fe_add(u, v, Atemp);                         /* v, or v+A if nonsquare */
-            Fe_neg.fe_neg(uneg, u);                             /* -v, or -v-A if nonsquare */
-            Fe_cmov.fe_cmov(u, uneg, nonsquare);                /* v, or -v-A if nonsquare */
-            Fe_copy.fe_copy(mont_x, u);
+            Fe_add.fe_add(u, x, Atemp);                         /* x, or x+A if nonsquare */
+            Fe_neg.fe_neg(uneg, u);                             /* -x, or -x-A if nonsquare */
+            Fe_cmov.fe_cmov(u, uneg, nonsquare);                /* x, or -x-A if nonsquare */
         }
 
-        public static void hash_to_point(ISha512 sha512provider, Ge_p3 iOut, byte[] iIn, int in_len)
+        public static void hash_to_point(ISha512 sha512provider, Ge_p3 p, byte[] iIn, int in_len)
         {
             byte[] hash = new byte[64];
             int[] h = new int[10];
-            int[] mont_x = new int[10];
+            int[] u = new int[10];
             byte sign_bit;
+            Ge_p2 p2 = new Ge_p2();
+            Ge_p1p1 p1p1 = new Ge_p1p1();
 
-            /* hash and elligator */
             sha512provider.calculateDigest(hash, iIn, in_len);
 
-            sign_bit = (byte)(hash[31] & 0x80); /* take the high bit as Edwards sign bit */
+            /* take the high bit as Edwards sign bit */
+            sign_bit = (byte)((hash[31] & 0x80) >> 7);
             hash[31] &= 0x7F;
             Fe_frombytes.fe_frombytes(h, hash);
+            elligator(u, h);
 
-            elligator(mont_x, h);
-
-            int[] ed_y = new int[10];
-            byte[] ed_pubkey = new byte[32];
-
-            Fe_montx_to_edy.fe_montx_to_edy(ed_y, mont_x);
-            Fe_tobytes.fe_tobytes(ed_pubkey, ed_y);
-            ed_pubkey[31] &= 0x7F; /* bit should be zero already, but just in case */
-            ed_pubkey[31] |= sign_bit;
-
-            /* decompress full point */
-            /* WARNING - due to timing-variance, don't use with secret inputs! */
-            Ge_frombytes.ge_frombytes_negate_vartime(iOut, ed_pubkey);
-
-            /* undo the negation */
-            Fe_neg.fe_neg(iOut.X, iOut.X);
-            Fe_neg.fe_neg(iOut.T, iOut.T);
+            Ge_montx_to_p2.ge_montx_to_p2(p2, u, sign_bit);
 
             /* multiply by 8 (cofactor) to map onto the main subgroup,
              * or map small-order points to the neutral element
              * (the latter prevents leaking r mod (2, 4, 8) via U) */
-            Ge_p1p1 dbl_result = new Ge_p1p1();
+            Ge_p2_dbl.ge_p2_dbl(p1p1, p2);
+            Ge_p1p1_to_p2.ge_p1p1_to_p2(p2, p1p1);
 
-            Ge_p3_dbl.ge_p3_dbl(dbl_result, iOut);
-            Ge_p1p1_to_p3.ge_p1p1_to_p3(iOut, dbl_result);
+            Ge_p2_dbl.ge_p2_dbl(p1p1, p2);
+            Ge_p1p1_to_p2.ge_p1p1_to_p2(p2, p1p1);
 
-            Ge_p3_dbl.ge_p3_dbl(dbl_result, iOut);
-            Ge_p1p1_to_p3.ge_p1p1_to_p3(iOut, dbl_result);
-
-            Ge_p3_dbl.ge_p3_dbl(dbl_result, iOut);
-            Ge_p1p1_to_p3.ge_p1p1_to_p3(iOut, dbl_result);
+            Ge_p2_dbl.ge_p2_dbl(p1p1, p2);
+            Ge_p1p1_to_p3.ge_p1p1_to_p3(p, p1p1);
         }
 
         public static void calculate_Bu(ISha512 sha512provider, Ge_p3 Bu, byte[] buf, byte[] msg, int msg_len)

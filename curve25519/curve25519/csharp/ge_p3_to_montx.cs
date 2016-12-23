@@ -19,24 +19,24 @@ namespace org.whispersystems.curve25519.csharp
 {
     public class Ge_p3_to_montx
     {
-        public static void ge_p3_to_montx(int[] montx, Ge_p3 ed)
+        public static void ge_p3_to_montx(int[] u, Ge_p3 ed)
         {
             /*
-             * mont_x = (ed_y + 1) / (1 - ed_y)
+             * u = (y + 1) / (1 - y)
+             * or
+             * u = (y + z) / (z - y)
              * 
-             * mont_x = (ed_y + ed_z) / (ed_z - ed_y)
-             * 
-             * NOTE: ed_y=1 is converted to mont_x=0 since fe_invert is mod-exp
+             * NOTE: y=1 is converted to u=0 since fe_invert is mod-exp
              */
 
-            int[] edy_plus_one = new int[10];
-            int[] one_minus_edy = new int[10];
-            int[] inv_one_minus_edy = new int[10];
+            int[] y_plus_one = new int[10];
+            int[] one_minus_y = new int[10];
+            int[] inv_one_minus_y = new int[10];
 
-            Fe_add.fe_add(edy_plus_one, ed.Y, ed.Z);
-            Fe_sub.fe_sub(one_minus_edy, ed.Z, ed.Y);
-            Fe_invert.fe_invert(inv_one_minus_edy, one_minus_edy);
-            Fe_mul.fe_mul(montx, edy_plus_one, inv_one_minus_edy);
+            Fe_add.fe_add(y_plus_one, ed.Y, ed.Z);
+            Fe_sub.fe_sub(one_minus_y, ed.Z, ed.Y);
+            Fe_invert.fe_invert(inv_one_minus_y, one_minus_y);
+            Fe_mul.fe_mul(u, y_plus_one, inv_one_minus_y);
         }
     }
 }

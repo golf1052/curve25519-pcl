@@ -25,15 +25,15 @@ namespace org.whispersystems.curve25519.csharp
              * (which is efficient due to precalculated tables), then convert
              * to the Curve25519 montgomery-format public key.
              * 
-             * NOTE: ed_y=1 is converted to mont_x=0 since fe_invert is mod-exp
+             * NOTE: y=1 is converted to u=0 since fe_invert is mod-exp 
              */
 
             Ge_p3 ed = new Ge_p3(); /* Ed25519 pubkey point */
-            int[] mont_x = new int[10];
+            int[] u = new int[10];
 
             Ge_scalarmult_base.ge_scalarmult_base(ed, curve25519_privkey_in);
-            Ge_p3_to_montx.ge_p3_to_montx(mont_x, ed);
-            Fe_tobytes.fe_tobytes(curve25519_pubkey_out, mont_x);
+            Ge_p3_to_montx.ge_p3_to_montx(u, ed);
+            Fe_tobytes.fe_tobytes(curve25519_pubkey_out, u);
         }
     }
 }

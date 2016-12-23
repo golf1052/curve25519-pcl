@@ -1,5 +1,5 @@
 ﻿/** 
- * Copyright (C) 2015 langboost
+ * Copyright (C) 2016 langboost, golf1052
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -71,6 +71,10 @@ namespace org.whispersystems.curve25519.csharp
             Sc_muladd.sc_muladd(S, hram, sk, nonce); /* NEW: Use privkey directly */
             Array.Copy(S, 0, sm, 32, 32);
 
+            /* Erase any traces of private scalar or
+             * nonce left in the stack from sc_muladd */
+            //zeroize_stack();
+            Zeroize.zeroize(nonce, 64);
             return 0;
         }
 

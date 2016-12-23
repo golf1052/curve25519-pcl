@@ -70,6 +70,12 @@ namespace org.whispersystems.curve25519.csharp
                 return -1;
             }
 
+            /* Reject U (actually -U) if small order */
+            if (Ge_is_small_order.ge_is_small_order(U) != 0)
+            {
+                return -1;
+            }
+
             // R = sB + h(-A)
             Ge_double_scalarmult.ge_double_scalarmult_vartime(R, h, A, s);
 

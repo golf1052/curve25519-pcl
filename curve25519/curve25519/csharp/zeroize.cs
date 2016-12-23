@@ -15,28 +15,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using System.Diagnostics;
-
 namespace org.whispersystems.curve25519.csharp
 {
-    public class utility
+    public class Zeroize
     {
-        public static void print_vector(string name, byte[] v)
-        {
-            int count;
-            Debug.WriteLine($"{name} = ");
-            for (count = 0; count < 32; count++)
-            {
-                Debug.WriteLine("{0:X2}", v[count]);
-            }
-            Debug.WriteLine("");
-        }
+        public const int ZEROIZE_STACK_SIZE = 1024;
 
-        public static void print_fe(string name, int[] iIn)
+        public static void zeroize(byte[] b, int len)
         {
-            byte[] bytes = new byte[32];
-            Fe_tobytes.fe_tobytes(bytes, iIn);
-            print_vector(name, bytes);
+            for (int i = 0; i < len; i++)
+            {
+                b[i] = 0;
+            }
         }
     }
 }

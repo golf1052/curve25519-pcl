@@ -62,13 +62,15 @@ namespace org.whispersystems.curve25519.csharp
             /* Perform an Ed25519 signature with explicit private key */
             usign_modified.crypto_usign_modified(sha512provider, sigbuf, msg, msg_len, a, A, random, Bu, signature_out /*U*/);
             Array.Copy(sigbuf, 0, signature_out, 32, 64);
+
+            Zeroize.zeroize(a, 32);
             return 0;
         }
 
         public static int uxdsa_verify(ISha512 sha512provider, byte[] signature, byte[] curve25519_pubkey, byte[] msg, int msg_len)
         {
-            int[] mont_x = new int[10];
-            int[] ed_y = new int[10];
+            int[] u = new int[10];
+            int[] y = new int[10];
 
             byte[] ed_pubkey = new byte[32];
             long some_retval = 0;
@@ -83,15 +85,15 @@ namespace org.whispersystems.curve25519.csharp
 
             Elligator.calculate_Bu(sha512provider, Bu, verifybuf, msg, msg_len);
 
-            /* Convert the Curve25519 public key into an Ed25519 public key.
+            /* Convert the Curve25519 public key (u) into an Ed25519 public key.
              * 
-             * ed_y = (mont_x - 1) / (mont_x + 1)
+             * y = (u - 1) / (u + 1)
              * 
-             * NOTE: mont_x=-1 is converted to ed_y=0 since fe_invert is mod-exp
+             * NOTE: u=-1 is converted to y=0 since fe_invert is mod-exp
              */
-            Fe_frombytes.fe_frombytes(mont_x, curve25519_pubkey);
-            Fe_montx_to_edy.fe_montx_to_edy(ed_y, mont_x);
-            Fe_tobytes.fe_tobytes(ed_pubkey, ed_y);
+            Fe_frombytes.fe_frombytes(u, curve25519_pubkey);
+            Fe_montx_to_edy.fe_montx_to_edy(y, u);
+            Fe_tobytes.fe_tobytes(ed_pubkey, y);
 
             Array.Copy(signature, 0, verifybuf, 0, 96);
             Array.Copy(msg, 0, verifybuf, 96, msg_len);

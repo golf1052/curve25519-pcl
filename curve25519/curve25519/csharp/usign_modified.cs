@@ -76,6 +76,10 @@ namespace org.whispersystems.curve25519.csharp
             Sc_muladd.sc_muladd(S3, h, a, r);
             Array.Copy(S3, 0, sm, 32, 32);
 
+            /* Erase any traces of private scalar or
+             * nonce left in the stack from sc_muladd. */
+            //zeroize_stack();
+            Zeroize.zeroize(r, 64);
             return 0;
         }
     }

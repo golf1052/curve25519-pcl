@@ -52,27 +52,26 @@ namespace org.whispersystems.curve25519.csharp
                               byte[] curve25519_pubkey,
                               byte[] msg, int msg_len)
         {
-            int[] mont_x = new int[10];
-            int[] one = new int[10];
-            int[] ed_y = new int[10];
+            int[] u = new int[10];
+            int[] y = new int[10];
             byte[] ed_pubkey = new byte[32];
             long some_retval = 0;
             byte[] verifybuf = new byte[msg_len + 64]; /* working buffer */
             byte[] verifybuf2 = new byte[msg_len + 64]; /* working buffer #2 */
 
             /* Convert the Curve25519 public key into an Ed25519 public key.  In
-               particular, convert Curve25519's "montgomery" x-coordinate into an
+               particular, convert Curve25519's "montgomery" x-coordinate (u) into an
                Ed25519 "edwards" y-coordinate:
 
-               ed_y = (mont_x - 1) / (mont_x + 1)
+               y = (u - 1) / (u + 1)
 
-               NOTE: mont_x=-1 is converted to ed_y=0 since fe_invert is mod-exp
+               NOTE: u=-1 is converted to y=0 since fe_invert is mod-exp
 
                Then move the sign bit into the pubkey from the signature.
             */
-            Fe_frombytes.fe_frombytes(mont_x, curve25519_pubkey);
-            Fe_montx_to_edy.fe_montx_to_edy(ed_y, mont_x);
-            Fe_tobytes.fe_tobytes(ed_pubkey, ed_y);
+            Fe_frombytes.fe_frombytes(u, curve25519_pubkey);
+            Fe_montx_to_edy.fe_montx_to_edy(y, u);
+            Fe_tobytes.fe_tobytes(ed_pubkey, y);
 
             /* Copy the sign bit, and remove it from signature */
             ed_pubkey[31] &= 0x7F;  /* bit should be zero already, but just in case */

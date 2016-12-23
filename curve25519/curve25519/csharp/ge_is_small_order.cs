@@ -15,28 +15,33 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using System.Diagnostics;
-
 namespace org.whispersystems.curve25519.csharp
 {
-    public class utility
+    public class Ge_is_small_order
     {
-        public static void print_vector(string name, byte[] v)
+        /*
+         * return 1 if f == g
+         * return 0 if f != g
+         */
+        public static int ge_is_small_order(Ge_p3 p)
         {
-            int count;
-            Debug.WriteLine($"{name} = ");
-            for (count = 0; count < 32; count++)
-            {
-                Debug.WriteLine("{0:X2}", v[count]);
-            }
-            Debug.WriteLine("");
-        }
+            Ge_p1p1 p1p1 = new Ge_p1p1();
+            Ge_p2 p2 = new Ge_p2();
+            int[] zero = new int[10];
 
-        public static void print_fe(string name, int[] iIn)
-        {
-            byte[] bytes = new byte[32];
-            Fe_tobytes.fe_tobytes(bytes, iIn);
-            print_vector(name, bytes);
+            Ge_p3_dbl.ge_p3_dbl(p1p1, p);
+            Ge_p1p1_to_p2.ge_p1p1_to_p2(p2, p1p1);
+
+            Ge_p2_dbl.ge_p2_dbl(p1p1, p2);
+            Ge_p1p1_to_p2.ge_p1p1_to_p2(p2, p1p1);
+
+            Ge_p2_dbl.ge_p2_dbl(p1p1, p2);
+            Ge_p1p1_to_p2.ge_p1p1_to_p2(p2, p1p1);
+
+            Fe_0.fe_0(zero);
+
+            /* Check if 8*p == neutral element == (0, 1) */
+            return (Fe_isequal.fe_isequal(p2.X, zero) & Fe_isequal.fe_isequal(p2.Y, p2.Z));
         }
     }
 }

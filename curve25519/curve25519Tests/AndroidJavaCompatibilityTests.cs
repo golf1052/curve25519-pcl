@@ -53,16 +53,6 @@ namespace curve25519Tests
             curve25519 = null;
         }
 
-        const int MSG_LEN = 200;
-
-        private static void ERROR(string msg, bool silent)
-        {
-            if (!silent)
-            {
-                utility.print_error(msg);
-            }
-        }
-
         [TestMethod]
         public void sha512_fast_test()
         {
@@ -84,7 +74,7 @@ namespace curve25519Tests
             sha512provider.calculateDigest(sha512_actual_output,
                 Encoding.UTF8.GetBytes(sha512_input),
                 sha512_input.Length);
-            CollectionAssert.AreEqual(sha512_correct_output, sha512_actual_output, "SHA512 #1 BAD");
+            CollectionAssert.AreEqual(sha512_correct_output, sha512_actual_output, "SHA512 #1");
 
             var tmp = Encoding.UTF8.GetBytes(sha512_input);
             tmp[111] ^= 1;
@@ -93,7 +83,60 @@ namespace curve25519Tests
             sha512provider.calculateDigest(sha512_actual_output,
                 Encoding.UTF8.GetBytes(sha512_input),
                 sha512_input.Length);
-            CollectionAssert.AreNotEqual(sha512_correct_output, sha512_actual_output, "SHA512 #2 BAD");
+            CollectionAssert.AreNotEqual(sha512_correct_output, sha512_actual_output, "SHA512 #2");
+        }
+
+        [TestMethod]
+        public void ge_is_small_order_test()
+        {
+            Ge_p3 o1 = new Ge_p3();
+            Ge_p3 o2 = new Ge_p3();
+            Ge_p3 o4a = new Ge_p3();
+            Ge_p3 o4b = new Ge_p3();
+
+            int[] zero = new int[10];
+            int[] one = new int[10];
+            int[] minusone = new int[10];
+
+            Fe_0.fe_0(zero);
+            Fe_1.fe_1(one);
+            Fe_sub.fe_sub(minusone, zero, one);
+
+            // o1 is the neutral point (order 1)
+            Fe_copy.fe_copy(o1.X, zero);
+            Fe_copy.fe_copy(o1.Y, one);
+            Fe_copy.fe_copy(o1.Z, one);
+            Fe_mul.fe_mul(o1.T, o1.X, o1.Y);
+
+            // o2 is the order 2 point
+            Fe_copy.fe_copy(o2.X, zero);
+            Fe_copy.fe_copy(o2.Y, minusone);
+            Fe_copy.fe_copy(o2.Z, one);
+            Fe_mul.fe_mul(o2.T, o2.X, o2.Y);
+
+            /* TODO check order 4 and 8 points */
+            Assert.IsTrue(Ge_is_small_order.ge_is_small_order(o1) != 0 && Ge_is_small_order.ge_is_small_order(o2) != 0, "ge_is_small_order #1");
+
+            Ge_p3 B0 = new Ge_p3();
+            Ge_p3 B1 = new Ge_p3();
+            Ge_p3 B2 = new Ge_p3();
+            Ge_p3 B100 = new Ge_p3();
+            byte[] scalar = new byte[32];
+
+            Ge_scalarmult_base.ge_scalarmult_base(B0, scalar);
+            scalar[0] = 1;
+            Ge_scalarmult_base.ge_scalarmult_base(B1, scalar);
+            scalar[0] = 2;
+            Ge_scalarmult_base.ge_scalarmult_base(B2, scalar);
+            scalar[0] = 100;
+            Ge_scalarmult_base.ge_scalarmult_base(B100, scalar);
+
+            Assert.IsTrue(Ge_is_small_order.ge_is_small_order(B0) != 0 &&
+                Ge_is_small_order.ge_is_small_order(B1) == 0 &&
+                Ge_is_small_order.ge_is_small_order(B2) == 0 &&
+                Ge_is_small_order.ge_is_small_order(B100) == 0,
+                "ge_is_small_order #2");
+
         }
 
         [TestMethod]
@@ -107,12 +150,20 @@ namespace curve25519Tests
                 0x44, 0x49, 0x15, 0x89, 0x9d, 0x95, 0xf4, 0x6e
             };
 
-            byte[] hashtopoint_correct_output = new byte[]
+            byte[] hashtopoint_correct_output1 = new byte[]
             {
                 0xce, 0x89, 0x9f, 0xb2, 0x8f, 0xf7, 0x20, 0x91,
                 0x5e, 0x14, 0xf5, 0xb7, 0x99, 0x08, 0xab, 0x17,
                 0xaa, 0x2e, 0xe2, 0x45, 0xb4, 0xfc, 0x2b, 0xf6,
                 0x06, 0x36, 0x29, 0x40, 0xed, 0x7d, 0xe7, 0xed
+            };
+
+            byte[] hashtopoint_correct_output2 = new byte[]
+            {
+                0xa0, 0x35, 0xbb, 0xa9, 0x4d, 0x30, 0x55, 0x33,
+                0x0d, 0xce, 0xc2, 0x7f, 0x83, 0xde, 0x79, 0xd0,
+                0x89, 0x67, 0x72, 0x4c, 0x07, 0x8d, 0x68, 0x9d,
+                0x61, 0x52, 0x1d, 0xf9, 0x2c, 0x5c, 0xba, 0x77
             };
 
             byte[] calculateu_correct_output = new byte[]
@@ -137,27 +188,31 @@ namespace curve25519Tests
             Fe_frombytes.fe_frombytes(iIn, bytes);
             Elligator.elligator(iOut, iIn);
             Fe_tobytes.fe_tobytes(bytes, iOut);
-            CollectionAssert.AreEqual(elligator_correct_output, bytes, "Elligator BAD!!!");
+            CollectionAssert.AreEqual(elligator_correct_output, bytes, "Elligator vector");
 
-            /*
-             * Test whether Elligator can calculate Legendre == 0
-             * Answer appears to be yes, since 2r^2 + 1 == 0 has a solution
-             * fe NEG1;
-             * fe ONE;
-             * fe TWO;
-             * fe_1(ONE);
-             * fe_add(TWO, ONE, ONE);
-             * fe_neg(NEG1, ONE);
-             * printf("NEG1\n");
-             * legendre_is_nonsquare(out, NEG1);
-             * printf("TWO\n");
-             * legendre_is_nonsquare(out, TWO);
-             * print_error("done");
-             */
+            /* Elligator(0) == 0 test */
+            Fe_0.fe_0(iIn);
+            Elligator.elligator(iOut, iIn);
+            CollectionAssert.AreEqual(iOut, iIn, "Elligator(0) == 0");
+
+            /* ge_montx_to_p2(0) -> order2 point test */
+            int[] one = new int[10];
+            int[] negone = new int[10];
+            int[] zero = new int[10];
+            Fe_1.fe_1(one);
+            Fe_0.fe_0(zero);
+            Fe_sub.fe_sub(negone, zero, one);
+            Ge_p2 p2 = new Ge_p2();
+            Ge_montx_to_p2.ge_montx_to_p2(p2, zero, 0);
+            Assert.IsTrue(Fe_isequal.fe_isequal(p2.X, zero) != 0 &&
+                Fe_isequal.fe_isequal(p2.Y, negone) != 0 &&
+                Fe_isequal.fe_isequal(p2.Z, one) != 0,
+                "ge_montx_to_p2(0) == order 2 point");
 
             /* Hash to point vector test */
             Ge_p3 p3 = new Ge_p3();
             byte[] htp = new byte[32];
+
             for (count = 0; count < 32; count++)
             {
                 htp[count] = (byte)count;
@@ -166,7 +221,16 @@ namespace curve25519Tests
             ISha512 sha512provider = new BouncyCastleDotNETSha512Provider();
             Elligator.hash_to_point(sha512provider, p3, htp, 32);
             Ge_p3_tobytes.ge_p3_tobytes(htp, p3);
-            CollectionAssert.AreEqual(hashtopoint_correct_output, htp, "hash_to_point BAD!!!");
+            CollectionAssert.AreEqual(hashtopoint_correct_output1, htp, "hash_to_point #1");
+
+            for (count = 0; count < 32; count++)
+            {
+                htp[count] = (byte)(count + 1);
+            }
+
+            Elligator.hash_to_point(sha512provider, p3, htp, 32);
+            Ge_p3_tobytes.ge_p3_tobytes(htp, p3);
+            CollectionAssert.AreEqual(hashtopoint_correct_output2, htp, "hash_to_point #2");
 
             /* calculate_U vector test */
             Ge_p3 Bu = new Ge_p3();
@@ -184,7 +248,7 @@ namespace curve25519Tests
             Sc_clamp.sc_clamp(a);
             Elligator.calculate_Bu_and_U(sha512provider, Bu, U, Ubuf, a, Umsg, 3);
 
-            CollectionAssert.AreEqual(calculateu_correct_output, U, "calculate_U BAD!!!");
+            CollectionAssert.AreEqual(calculateu_correct_output, U, "calculate_Bu_and_U vector");
         }
 
         [TestMethod]
@@ -201,6 +265,7 @@ namespace curve25519Tests
                 0x0b, 0xd6, 0xc1, 0x97, 0x3f, 0x7d, 0x78, 0x0a,
                 0xb3, 0x95, 0x18, 0x62, 0x68, 0x03, 0xd7, 0x82,
             };
+            const int MSG_LEN = 200;
             byte[] privkey = new byte[32];
             byte[] pubkey = new byte[32];
             byte[] signature = new byte[64];
@@ -216,13 +281,13 @@ namespace curve25519Tests
             ISha512 sha512provider = new BouncyCastleDotNETSha512Provider();
             Curve_sigs.curve25519_sign(sha512provider, signature, privkey, msg, MSG_LEN, random);
 
-            CollectionAssert.AreEqual(signature_correct, signature, "Curvesig incorrect - BAD");
+            CollectionAssert.AreEqual(signature_correct, signature, "Curvesig sign");
 
-            Assert.AreEqual(0, Curve_sigs.curve25519_verify(sha512provider, signature, pubkey, msg, MSG_LEN), "Curvesig #1 didn't verify - BAD");
+            Assert.AreEqual(0, Curve_sigs.curve25519_verify(sha512provider, signature, pubkey, msg, MSG_LEN), "Curvesig verify #1");
 
             signature[0] ^= 1;
 
-            Assert.AreNotEqual(0, Curve_sigs.curve25519_verify(sha512provider, signature, pubkey, msg, MSG_LEN), "Curvesig #2 verified - BAD");
+            Assert.AreNotEqual(0, Curve_sigs.curve25519_verify(sha512provider, signature, pubkey, msg, MSG_LEN), "Curvesig verify #2");
         }
 
         [TestMethod]
@@ -239,6 +304,7 @@ namespace curve25519Tests
                 0x69, 0xad, 0xa5, 0x76, 0xd6, 0x3d, 0xca, 0xf2,
                 0xac, 0x32, 0x6c, 0x11, 0xd0, 0xb9, 0x77, 0x02,
             };
+            const int MSG_LEN = 200;
             byte[] privkey = new byte[32];
             byte[] pubkey = new byte[32];
             byte[] signature = new byte[64];
@@ -255,13 +321,13 @@ namespace curve25519Tests
 
             xdsa.xdsa_sign(sha512provider, signature, privkey, msg, MSG_LEN, random);
 
-            CollectionAssert.AreEqual(signature_correct, signature, "XDSA incorrect - BAD");
+            CollectionAssert.AreEqual(signature_correct, signature, "XDSA sign");
 
-            Assert.AreEqual(0, xdsa.xdsa_verify(sha512provider, signature, pubkey, msg, MSG_LEN), "XDSA #1 didn't verify - BAD");
+            Assert.AreEqual(0, xdsa.xdsa_verify(sha512provider, signature, pubkey, msg, MSG_LEN), "XDSA verify #1");
 
             signature[0] ^= 1;
 
-            Assert.AreNotEqual(0, xdsa.xdsa_verify(sha512provider, signature, pubkey, msg, MSG_LEN), "XDSA #2 verified - BAD");
+            Assert.AreNotEqual(0, xdsa.xdsa_verify(sha512provider, signature, pubkey, msg, MSG_LEN), "XDSA verify #2");
         }
 
         [TestMethod]
@@ -282,6 +348,7 @@ namespace curve25519Tests
                 0x29, 0xd9, 0xfc, 0xee, 0x1c, 0x08, 0x6d, 0x5a,
                 0x28, 0xa1, 0x27, 0xf0, 0x06, 0xb9, 0x79, 0x03
             };
+            const int MSG_LEN = 200;
             byte[] privkey = new byte[32];
             byte[] pubkey = new byte[32];
             byte[] signature = new byte[96];
@@ -298,13 +365,13 @@ namespace curve25519Tests
 
             uxdsa.uxdsa_sign(sha512provider, signature, privkey, msg, MSG_LEN, random);
 
-            CollectionAssert.AreEqual(signature_correct, signature, "UXDSA incorrect - BAD");
+            CollectionAssert.AreEqual(signature_correct, signature, "UXDSA sign");
 
-            Assert.AreEqual(0, uxdsa.uxdsa_verify(sha512provider, signature, pubkey, msg, MSG_LEN), "UXDSA #1 didn't verify - BAD");
+            Assert.AreEqual(0, uxdsa.uxdsa_verify(sha512provider, signature, pubkey, msg, MSG_LEN), "UXDSA verify #1");
 
             signature[0] ^= 1;
 
-            Assert.AreNotEqual(0, uxdsa.uxdsa_verify(sha512provider, signature, pubkey, msg, MSG_LEN), "UXDSA #2 verified - BAD");
+            Assert.AreNotEqual(0, uxdsa.uxdsa_verify(sha512provider, signature, pubkey, msg, MSG_LEN), "UXDSA verify #2");
 
             /* Test U */
             byte[] sigprev = new byte[96];
@@ -318,13 +385,13 @@ namespace curve25519Tests
             Array.Copy(signature, 0, sig0, 0, 32);
             byte[] sigprev0 = new byte[32];
             Array.Copy(sigprev, 0, sigprev0, 0, 32);
-            CollectionAssert.AreEqual(sigprev0, sig0, "UXDSA U value changed - BAD");
+            CollectionAssert.AreEqual(sigprev0, sig0, "UXDSA U value changed");
 
             byte[] sig32 = new byte[64];
             Array.Copy(signature, 32, sig32, 0, 64);
             byte[] sigprev32 = new byte[64];
             Array.Copy(sigprev, 32, sigprev32, 0, 64);
-            CollectionAssert.AreNotEqual(sigprev32, sig32, "UXDSA (h, s) values didn't change - BAD");
+            CollectionAssert.AreNotEqual(sigprev32, sig32, "UXDSA (h, s) changed");
         }
 
         [TestMethod]
@@ -344,6 +411,7 @@ namespace curve25519Tests
             };
 
             int count;
+            const int MSG_LEN = 200;
             byte[] privkey = new byte[32];
             byte[] pubkey = new byte[32];
             byte[] signature = new byte[64];
@@ -365,7 +433,7 @@ namespace curve25519Tests
 
                 Curve_sigs.curve25519_sign(sha512provider, signature, privkey, msg, MSG_LEN, random);
 
-                Assert.AreEqual(0, Curve_sigs.curve25519_verify(sha512provider, signature, pubkey, msg, MSG_LEN), "Curvesig verify failure #1");
+                Assert.AreEqual(0, Curve_sigs.curve25519_verify(sha512provider, signature, pubkey, msg, MSG_LEN), $"Curvesig verify failure #1 {count}");
 
                 if ((b[63] & 1) != 0)
                 {
@@ -375,11 +443,11 @@ namespace curve25519Tests
                 {
                     msg[count % MSG_LEN] ^= 1;
                 }
-                Assert.AreNotEqual(0, Curve_sigs.curve25519_verify(sha512provider, signature, pubkey, msg, MSG_LEN), "Curvesig verify failure #2");
+                Assert.AreNotEqual(0, Curve_sigs.curve25519_verify(sha512provider, signature, pubkey, msg, MSG_LEN), $"Curvesig verify failure #2 {count}");
 
                 if (count == 10000)
                 {
-                    CollectionAssert.AreEqual(signature_10k_correct, signature, "Curvesig signature 10K doesn't match");
+                    CollectionAssert.AreEqual(signature_10k_correct, signature, $"Curvesig signature 10K doesn't match {count}");
                 }
             }
         }
@@ -401,6 +469,7 @@ namespace curve25519Tests
             };
 
             int count;
+            const int MSG_LEN = 200;
             byte[] privkey = new byte[32];
             byte[] pubkey = new byte[32];
             byte[] signature = new byte[96];
@@ -428,7 +497,7 @@ namespace curve25519Tests
 
                 xdsa.xdsa_sign(sha512provider, signature, privkey, msg, MSG_LEN, random);
 
-                Assert.AreEqual(0, xdsa.xdsa_verify(sha512provider, signature, pubkey, msg, MSG_LEN), "XDSA verify failure #1");
+                Assert.AreEqual(0, xdsa.xdsa_verify(sha512provider, signature, pubkey, msg, MSG_LEN), $"XDSA verify failure #1 {count}");
 
                 if ((b[63] & 1) != 0)
                 {
@@ -438,13 +507,13 @@ namespace curve25519Tests
                 {
                     msg[count % MSG_LEN] ^= 1;
                 }
-                Assert.AreNotEqual(0, xdsa.xdsa_verify(sha512provider, signature, pubkey, msg, MSG_LEN), "XDSA verify failure #2");
+                Assert.AreNotEqual(0, xdsa.xdsa_verify(sha512provider, signature, pubkey, msg, MSG_LEN), $"XDSA verify failure #2 {count}");
 
                 if (count == 10000)
                 {
                     byte[] sig0 = new byte[64];
                     Array.Copy(signature, 0, sig0, 0, 64);
-                    CollectionAssert.AreEqual(signature_10k_correct, sig0, "XDSA signature 10K doesn't match");
+                    CollectionAssert.AreEqual(signature_10k_correct, sig0, $"XDSA signature 10K doesn't match {count}");
                 }
             }
         }
@@ -466,6 +535,7 @@ namespace curve25519Tests
             };
 
             int count;
+            const int MSG_LEN = 200;
             byte[] privkey = new byte[32];
             byte[] pubkey = new byte[32];
             byte[] signature = new byte[96];
@@ -493,7 +563,7 @@ namespace curve25519Tests
 
                 xdsa.xdsa_sign(sha512provider, signature, privkey, msg, MSG_LEN, random);
 
-                Assert.AreEqual(0, Curve_sigs.curve25519_verify(sha512provider, signature, pubkey, msg, MSG_LEN), "XDSA/Curvesigs verify failure #1");
+                Assert.AreEqual(0, Curve_sigs.curve25519_verify(sha512provider, signature, pubkey, msg, MSG_LEN), $"XDSA/Curvesigs verify failure #1 {count}");
 
                 if ((b[63] & 1) != 0)
                 {
@@ -503,13 +573,13 @@ namespace curve25519Tests
                 {
                     msg[count % MSG_LEN] ^= 1;
                 }
-                Assert.AreNotEqual(0, Curve_sigs.curve25519_verify(sha512provider, signature, pubkey, msg, MSG_LEN), "XDSA/Curvesigs verify failure #2");
+                Assert.AreNotEqual(0, Curve_sigs.curve25519_verify(sha512provider, signature, pubkey, msg, MSG_LEN), $"XDSA/Curvesigs verify failure #2 {count}");
 
                 if (count == 10000)
                 {
                     byte[] sig0 = new byte[64];
                     Array.Copy(signature, 0, sig0, 0, 64);
-                    CollectionAssert.AreEqual(signature_10k_correct, sig0, "XDSA/Curvesigs signature 10K doesn't match");
+                    CollectionAssert.AreEqual(signature_10k_correct, sig0, $"XDSA/Curvesigs signature 10K doesn't match {count}");
                 }
             }
         }
@@ -535,6 +605,7 @@ namespace curve25519Tests
             };
 
             int count;
+            const int MSG_LEN = 200;
             byte[] privkey = new byte[32];
             byte[] pubkey = new byte[32];
             byte[] signature = new byte[96];
@@ -561,7 +632,7 @@ namespace curve25519Tests
 
                 uxdsa.uxdsa_sign(sha512provider, signature, privkey, msg, MSG_LEN, random);
 
-                Assert.AreEqual(0, uxdsa.uxdsa_verify(sha512provider, signature, pubkey, msg, MSG_LEN), "UXDSA verify failure #1");
+                Assert.AreEqual(0, uxdsa.uxdsa_verify(sha512provider, signature, pubkey, msg, MSG_LEN), $"UXDSA verify failure #1 {count}");
 
                 if ((b[63] & 1) != 0)
                 {
@@ -571,11 +642,11 @@ namespace curve25519Tests
                 {
                     msg[count % MSG_LEN] ^= 1;
                 }
-                Assert.AreNotEqual(0, uxdsa.uxdsa_verify(sha512provider, signature, pubkey, msg, MSG_LEN), "UXDSA verify failure #2");
+                Assert.AreNotEqual(0, uxdsa.uxdsa_verify(sha512provider, signature, pubkey, msg, MSG_LEN), $"UXDSA verify failure #2 {count}");
 
                 if (count == 10000)
                 {
-                    CollectionAssert.AreEqual(signature_10k_correct, signature, "UXDSA 10K doesn't match");
+                    CollectionAssert.AreEqual(signature_10k_correct, signature, $"UXDSA 10K doesn't match {count}");
                 }
             }
         }

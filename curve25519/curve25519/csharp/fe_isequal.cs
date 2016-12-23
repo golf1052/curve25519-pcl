@@ -1,5 +1,5 @@
 ﻿/** 
- * Copyright (C) 2016 langboost, golf1052
+ * Copyright (C) 2016 golf1052
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,39 +17,18 @@
 
 namespace org.whispersystems.curve25519.csharp
 {
-
-    public class Fe_isnonzero
+    public class Fe_isequal
     {
-
-        //CONVERT #include "fe.h"
-        //CONVERT #include "crypto_verify_32.crypto_verify_32.h"
-
         /*
-        return nonzero if f == 0
-        return 0 if f != 0
-
-        Preconditions:
-           |f| bounded by 1.1*2^26,1.1*2^25,1.1*2^26,1.1*2^25,etc.
-        */
-
-        /* TREVOR's COMMENT
-         * 
-         * I think the above comment is wrong. Instead:
-         * 
-         * return 0 if == 0
-         * return -1 if f != 0
-         * 
+         * return 1 if f == g
+         * return 0 if f != g
          */
-        
-        static readonly byte[] zero = new byte[32];
 
-        public static int fe_isnonzero(int[] f)
+        public static int fe_isequal(int[] f, int[] g)
         {
-            byte[] s = new byte[32];
-            Fe_tobytes.fe_tobytes(s, f);
-            return Crypto_verify_32.crypto_verify_32(s, zero);
+            int[] h = new int[10];
+            Fe_sub.fe_sub(h, f, g);
+            return 1 ^ (1 & (Fe_isnonzero.fe_isnonzero(h) >> 8));
         }
-
-
     }
 }
