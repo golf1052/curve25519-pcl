@@ -91,7 +91,7 @@ namespace org.whispersystems.curve25519
         {
             byte[] result = new byte[64];
 
-            if (uxdsa.uxdsa_sign(sha512provider, result, privateKey, message, message.Length, random) != 0)
+            if (xdsa.xdsa_sign(sha512provider, result, privateKey, message, message.Length, random) != 0)
             {
                 throw new ArgumentException("Message exceeds max length!");
             }

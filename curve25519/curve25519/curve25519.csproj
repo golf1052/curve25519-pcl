@@ -107,6 +107,7 @@
     <Compile Include="csharp\usign_modified.cs" />
     <Compile Include="csharp\utility.cs" />
     <Compile Include="csharp\uxdsa.cs" />
+    <Compile Include="csharp\xdsa.cs" />
     <Compile Include="Curve25519.cs" />
     <Compile Include="Curve25519KeyPair.cs" />
     <Compile Include="Curve25519Provider.cs" />

@@ -103,14 +103,17 @@ namespace org.whispersystems.curve25519.csharp
             Fe_neg.fe_neg(U.X, U.X);
             Fe_neg.fe_neg(U.T, U.T);
             byte[] M = new byte[32];
+            Array.Copy(m, 64, M, 0, 32);
             Ge_p3_tobytes.ge_p3_tobytes(M, U);
             Array.Copy(M, 0, m, 64, 32);
             byte[] M2 = new byte[32];
+            Array.Copy(m, 96, M2, 0, 32);
             Ge_tobytes.ge_tobytes(M2, R);
-            Array.Copy(M, 0, m, 96, 32);
+            Array.Copy(M2, 0, m, 96, 32);
             byte[] M3 = new byte[32];
+            Array.Copy(m, 128, M3, 0, 32);
             Ge_p3_tobytes.ge_p3_tobytes(M3, Ru);
-            Array.Copy(M, 0, m, 128, 32);
+            Array.Copy(M3, 0, m, 128, 32);
             Array.Copy(sm, 96, m, 160, (int)smlen - 96);
 
             sha512provider.calculateDigest(hcheck, m, smlen + 64);

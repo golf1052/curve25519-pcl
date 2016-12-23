@@ -21,7 +21,14 @@ namespace org.whispersystems.curve25519.csharp
 {
     public class usign_modified
     {
-        public static int crypto_usign_modified(ISha512 sha512provider, byte[] sm, byte[] M, int Mlen, byte[] a, byte[] A, byte[] random, Ge_p3 Bu, byte[] U)
+        public static int crypto_usign_modified(ISha512 sha512provider,
+            byte[] sm,
+            byte[] M, int Mlen,
+            byte[] a,
+            byte[] A,
+            byte[] random,
+            Ge_p3 Bu,
+            byte[] U)
         {
             byte[] r = new byte[64];
             byte[] h = new byte[64];
@@ -51,9 +58,11 @@ namespace org.whispersystems.curve25519.csharp
             Array.Copy(A, 0, sm, 32, 32);
             Array.Copy(U, 0, sm, 64, 32);
             byte[] S = new byte[32];
+            Array.Copy(sm, 96, S, 0, 32);
             Ge_p3_tobytes.ge_p3_tobytes(S, R);
             Array.Copy(S, 0, sm, 96, 32);
             byte[] S2 = new byte[32];
+            Array.Copy(sm, 128, S2, 0, 32);
             Ge_p3_tobytes.ge_p3_tobytes(S2, Ru);
             Array.Copy(S2, 0, sm, 128, 32);
             Array.Copy(M, 0, sm, 160, Mlen);
@@ -63,7 +72,8 @@ namespace org.whispersystems.curve25519.csharp
 
             Array.Copy(h, 0, sm, 0, 32); /* Write h */
             byte[] S3 = new byte[32];
-            Sc_muladd.sc_muladd(S, h, a, r);
+            Array.Copy(sm, 32, S3, 0, 32);
+            Sc_muladd.sc_muladd(S3, h, a, r);
             Array.Copy(S3, 0, sm, 32, 32);
 
             return 0;

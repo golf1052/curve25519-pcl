@@ -19,6 +19,6 @@ namespace org.whispersystems.curve25519.csharp
 {
     public class crypto_additions
     {
-        public static int MAX_MSG_LEN = 256;
+        public const int MAX_MSG_LEN = 256;
     }
 }
