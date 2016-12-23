@@ -57,6 +57,7 @@ namespace org.whispersystems.curve25519.csharp
             int[] twor2 = new int[10];
             int[] twor2plus1 = new int[10];
             int[] twor2plus1inv = new int[10];
+
             int[] x = new int[10];
             int[] e = new int[10];
             int[] Atemp = new int[10];
@@ -95,7 +96,7 @@ namespace org.whispersystems.curve25519.csharp
             sha512provider.calculateDigest(hash, iIn, in_len);
 
             /* take the high bit as Edwards sign bit */
-            sign_bit = (byte)((hash[31] & 0x80) >> 7);
+            sign_bit = (byte)(((uint)hash[31] & 0x80) >> 7);
             hash[31] &= 0x7F;
             Fe_frombytes.fe_frombytes(h, hash);
             elligator(u, h);

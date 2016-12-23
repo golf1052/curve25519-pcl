@@ -1,5 +1,5 @@
 ﻿/** 
- * Copyright (C) 2015 langboost
+ * Copyright (C) 2016 langboost, golf1052
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,16 @@ namespace org.whispersystems.curve25519.csharp
         {
             int differentbits = 0;
             for (int count = 0; count < 32; count++)
+            {
+                differentbits |= (x[count] ^ y[count]);
+            }
+            return differentbits;
+        }
+
+        public static int crypto_verify_32(int[] x, int[] y)
+        {
+            int differentbits = 0;
+            for (int count = 0; count < 10; count++)
             {
                 differentbits |= (x[count] ^ y[count]);
             }

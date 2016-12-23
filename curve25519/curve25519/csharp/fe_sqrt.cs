@@ -38,7 +38,7 @@ namespace org.whispersystems.curve25519.csharp
             int[] i = new int[10];
 
             Fe_frombytes.fe_frombytes(i, i_bytes);
-            Fe_pow22523.fe_pow22523(exp, a);/* b = a^(q-5)/8 */
+            Fe_pow22523.fe_pow22523(exp, a);    /* b = a^(q-5)/8 */
 
             /* PRECONDITION: legendre symbol == 1 (square) or 0 (a == zero) */
             //#ifndef NDEBUG
@@ -53,23 +53,13 @@ namespace org.whispersystems.curve25519.csharp
             //assert(fe_isequal(legendre, zero) || fe_isequal(legendre, one));
             //#endif
 
-            Fe_mul.fe_mul(b, a, exp); /* b = a * a^(q-5)/8 */
-            Fe_sq.fe_sq(b2, b); /* b^2 = a * a^(q-1)/4 */
+            Fe_mul.fe_mul(b, a, exp);           /* b = a * a^(q-5)/8 */
+            Fe_sq.fe_sq(b2, b);                 /* b^2 = a * a^(q-1)/4 */
 
             /* note b^4 == a^2, so b^2 == a or -a
              * if b^2 != a, multiply it by sqrt(-1) */
             Fe_mul.fe_mul(bi, b, i);
-            byte[] aBytes = new byte[32];
-            for (int count = 0; count < aBytes.Length; count++)
-            {
-                aBytes[count] = (byte)a[count];
-            }
-            byte[] b2Bytes = new byte[32];
-            for (int count = 0; count < b2Bytes.Length; count++)
-            {
-                b2Bytes[count] = (byte)b2[count];
-            }
-            Fe_cmov.fe_cmov(b, bi, Crypto_verify_32.crypto_verify_32(aBytes, b2Bytes) & 1);
+            Fe_cmov.fe_cmov(b, bi, Crypto_verify_32.crypto_verify_32(a, b2) & 1);
             Fe_copy.fe_copy(iOut, b);
 
             /* PRECONDITION: out^2 == a */

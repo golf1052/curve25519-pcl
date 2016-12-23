@@ -23,6 +23,7 @@ namespace org.whispersystems.curve25519.csharp
         {
             /*
              * y = (u - 1) / (u + 1)
+             * 
              * NOTE: u=-1 is converted to y=0 since fe_invert is mod-exp
              */
 
