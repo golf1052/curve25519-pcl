@@ -1,5 +1,5 @@
 ﻿/** 
- * Copyright (C) 2015 langboost
+ * Copyright (C) 2016 langboost, golf1052
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -131,8 +131,18 @@ namespace org.whispersystems.curve25519
          * @param privateKey The Curve25519 (typically yours) private key.
          * @return A 32-byte shared secret.
          */
-        public byte[] calculateAgreement(byte[] privateKey, byte[] publicKey)
+        public byte[] calculateAgreement(byte[] publicKey, byte[] privateKey)
         {
+            if (publicKey == null || privateKey == null)
+            {
+                throw new ArgumentException("Keys must not be null!");
+            }
+
+            if (publicKey.Length != 32 || privateKey.Length != 32)
+            {
+                throw new ArgumentException("Keys must be 32 bytes!");
+            }
+
             return provider.calculateAgreement(privateKey, publicKey);
         }
 
@@ -145,6 +155,11 @@ namespace org.whispersystems.curve25519
          */
         public byte[] calculateSignature(byte[] privateKey, byte[] message)
         {
+            if (privateKey == null || privateKey.Length != 32)
+            {
+                throw new ArgumentException("Invalid private key length!");
+            }
+
             byte[] random = provider.getRandom(64);
             return calculateSignature(random, privateKey, message);
         }
@@ -164,6 +179,21 @@ namespace org.whispersystems.curve25519
          */
         public bool verifySignature(byte[] publicKey, byte[] message, byte[] signature)
         {
+            if (publicKey == null || publicKey.Length != 32)
+            {
+                throw new ArgumentException("Invalid public key!");
+            }
+
+            if (message == null)
+            {
+                throw new ArgumentException("Message can't be null!");
+            }
+
+            if (signature == null || signature.Length != 64)
+            {
+                throw new ArgumentException("Invalid signature size!");
+            }
+
             return provider.verifySignature(publicKey, message, signature);
         }
 

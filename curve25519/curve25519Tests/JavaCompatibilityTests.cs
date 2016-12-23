@@ -1,5 +1,5 @@
 ﻿/** 
- * Copyright (C) 2015 langboost
+ * Copyright (C) 2016 langboost, golf1052
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@ using System.Collections.Generic;
 using org.whispersystems.curve25519;
 using org.whispersystems.curve25519.csharp;
 using System.Text;
+using curve25519;
 
 namespace Curve25519WinRT.WindowsPhone_Tests
 {
@@ -91,6 +92,7 @@ namespace Curve25519WinRT.WindowsPhone_Tests
         [TestMethod]
         public void testEcDh()
         {
+            Curve25519Provider provider = new CSharpCurve25519Provider();
             byte[] p = new byte[32];
             byte[] q = null;
             byte[] n = new byte[32];
@@ -98,15 +100,15 @@ namespace Curve25519WinRT.WindowsPhone_Tests
             p[0] = 100;
             n[0] = 100;
 
-            n = curve25519.generatePrivateKey(n);
+            n = provider.generatePrivateKey(n);
 
             for (int count = 0; count < 1000; count++)
             {
-                q = curve25519.calculateAgreement(n, p);
+                q = provider.calculateAgreement(n, p);
                 Array.Copy(q, 0, p, 0, 32);
-                q = curve25519.calculateAgreement(n, p);
+                q = provider.calculateAgreement(n, p);
                 Array.Copy(q, 0, n, 0, 32);
-                n = curve25519.generatePrivateKey(n);
+                n = provider.generatePrivateKey(n);
             }
 
             byte[] result = new byte[]{
