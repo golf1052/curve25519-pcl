@@ -184,17 +184,53 @@ namespace org.whispersystems.curve25519
                 throw new ArgumentException("Invalid public key!");
             }
 
-            if (message == null)
+            if (message == null || signature == null || signature.Length != 64)
             {
-                throw new ArgumentException("Message can't be null!");
-            }
-
-            if (signature == null || signature.Length != 64)
-            {
-                throw new ArgumentException("Invalid signature size!");
+                return false;
             }
 
             return provider.verifySignature(publicKey, message, signature);
+        }
+
+        /**
+         * Calculates a Unique Curve25519 signature.
+         *
+         * @param privateKey The private Curve25519 key to create the signature with.
+         * @param message The message to sign.
+         * @return A 96-byte signature.
+         */
+        public byte[] calculateUniqueSignature(byte[] privateKey, byte[] message)
+        {
+            if (privateKey == null || privateKey.Length != 32)
+            {
+                throw new ArgumentException("Invalid private key!");
+            }
+
+            byte[] random = provider.getRandom(64);
+            return provider.calculateUniqueSignature(random, privateKey, message);
+        }
+
+        /**
+         * Verify a Unique Curve25519 signature.
+         * 
+         * @param publicKey The Curve25519 public key the unique signature belongs to.
+         * @param message The message that was signed.
+         * @param signature The unique signature to verify.
+         * @return true if valid, false if not.
+         */
+        public bool verifyUniqueSignature(byte[] publicKey, byte[] message, byte[] signature)
+        {
+            if (publicKey == null || publicKey.Length != 32)
+            {
+                throw new ArgumentException("Invalid public key!");
+            }
+
+            if (message == null || signature == null || signature.Length != 96)
+            {
+                return false;
+            }
+
+            return provider.verifyUniqueSignature(publicKey, message, signature);
         }
 
         private static Curve25519Provider constructCSharpProvider(csharp.ISha512 sha, SecureRandomProvider random)

@@ -178,5 +178,27 @@ namespace Curve25519WinRT.WindowsPhone_Tests
             CollectionAssert.AreEqual(r, r_expected);
             #endregion
         }
+
+        [TestMethod]
+        public void testUniqueSignatures()
+        {
+            Curve25519KeyPair keys = curve25519.generateKeyPair();
+            Random random = new Random();
+
+            for (int i = 1; i <= 256; i++)
+            {
+                byte[] message = new byte[i];
+                random.NextBytes(message);
+
+                byte[] signature = curve25519.calculateUniqueSignature(keys.getPrivateKey(), message);
+
+                Assert.IsTrue(curve25519.verifyUniqueSignature(keys.getPublicKey(), message, signature));
+                Assert.IsFalse(curve25519.verifySignature(keys.getPublicKey(), message, signature));
+
+                message[Math.Abs(random.Next(int.MaxValue)) % message.Length] ^= 0x01;
+
+                Assert.IsFalse(curve25519.verifyUniqueSignature(keys.getPublicKey(), message, signature));
+            }
+        }
     }
 }

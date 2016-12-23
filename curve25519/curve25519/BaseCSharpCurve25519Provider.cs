@@ -106,14 +106,14 @@ namespace org.whispersystems.curve25519
 
         public override byte[] calculateUniqueSignature(byte[] random, byte[] privateKey, byte[] message)
         {
-            byte[] result = new byte[64];
+            byte[] signature = new byte[96];
 
-            if (uxdsa.uxdsa_sign(sha512provider, result, privateKey, message, message.Length, random) != 0)
+            if (uxdsa.uxdsa_sign(sha512provider, signature, privateKey, message, message.Length, random) != 0)
             {
                 throw new ArgumentException("Signature failed!");
             }
 
-            return result;
+            return signature;
         }
 
         public override bool verifyUniqueSignature(byte[] publicKey, byte[] message, byte[] signature)
