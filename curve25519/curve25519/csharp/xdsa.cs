@@ -30,14 +30,17 @@ namespace org.whispersystems.curve25519.csharp
             byte[] a = new byte[32];
             byte[] A = new byte[32];
             Ge_p3 ed_pubkey_point = new Ge_p3();
-            byte[] sigbuf = new byte[crypto_additions.MAX_MSG_LEN + 128]; /* working buffer */
+            // see link below
+            byte[] sigbuf = new byte[msg_len + 128]; /* working buffer */
             byte sign_bit = 0;
 
-            if (msg_len > crypto_additions.MAX_MSG_LEN)
-            {
-                //memset(signature_out, 0, 64);
-                return -1;
-            }
+            // this should be different but whatever
+            // https://github.com/WhisperSystems/curve25519-java/commit/2f388f601afdac6a78a19ced2f0629da1ff9800f#diff-6e488e4e28814b3fa524b6781fcaf912R19
+            //if (msg_len > crypto_additions.MAX_MSG_LEN)
+            //{
+            //    //memset(signature_out, 0, 64);
+            //    return -1;
+            //}
 
             /* Convert the Curve25519 privkey to an Ed25519 public key */
             Ge_scalarmult_base.ge_scalarmult_base(ed_pubkey_point, curve25519_privkey);
