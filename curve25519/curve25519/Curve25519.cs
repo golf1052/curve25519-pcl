@@ -38,13 +38,11 @@ using System.Reflection;
 */
 namespace org.whispersystems.curve25519
 {
-
-    /**
-     * A Curve25519 interface for generating keys, calculating agreements, creating signatures,
-     * and verifying signatures.
-     *
-     * @author Moxie Marlinspike
-     */
+    /// <summary>
+    /// A Curve25519 interface for generating keys, calculating agreements, creating signatures,
+    /// and verifying signatures.
+    /// </summary>
+    /// <remarks>@author Moxie Marlinspike</remarks>
     public class Curve25519
     {
         /// <summary>
@@ -84,13 +82,12 @@ namespace org.whispersystems.curve25519
             this.provider = provider;
         }
 
-        /**
-         * {@link Curve25519} is backed by either a native (via JNI)
-         * or pure-Java provider.  By default it prefers the native provider, and falls back to the
-         * pure-Java provider if the native library fails to load.
-         *
-         * @return true if backed by a native provider, false otherwise.
-         */
+        /// <summary>
+        /// <see cref="Curve25519"/> is backed by either a native (via JNI)
+        /// or pure-Java provider.  By default it prefers the native provider, and falls back to the
+        /// pure-Java provider if the native library fails to load.
+        /// </summary>
+        /// <returns>true if backed by a native provider, false otherwise.</returns>
         public bool isNative()
         {
             return provider.isNative();
@@ -111,11 +108,10 @@ namespace org.whispersystems.curve25519
             return provider.generatePublicKey(privateKey);
         }
 
-        /**
-         * Generates a Curve25519 keypair.
-         *
-         * @return A randomly generated Curve25519 keypair.
-         */
+        /// <summary>
+        /// Generates a Curve25519 keypair.
+        /// </summary>
+        /// <returns>A randomly generated Curve25519 keypair.</returns>
         public Curve25519KeyPair generateKeyPair()
         {
             byte[] privateKey = provider.generatePrivateKey();
@@ -124,13 +120,12 @@ namespace org.whispersystems.curve25519
             return new Curve25519KeyPair(publicKey, privateKey);
         }
 
-        /**
-         * Calculates an ECDH agreement.
-         *
-         * @param publicKey The Curve25519 (typically remote party's) public key.
-         * @param privateKey The Curve25519 (typically yours) private key.
-         * @return A 32-byte shared secret.
-         */
+        /// <summary>
+        /// Calculates an ECDH agreement.
+        /// </summary>
+        /// <param name="publicKey">The Curve25519 (typically remote party's) public key.</param>
+        /// <param name="privateKey">The Curve25519 (typically yours) private key.</param>
+        /// <returns>A 32-byte shared secret.</returns>
         public byte[] calculateAgreement(byte[] publicKey, byte[] privateKey)
         {
             if (publicKey == null || privateKey == null)
@@ -146,13 +141,12 @@ namespace org.whispersystems.curve25519
             return provider.calculateAgreement(privateKey, publicKey);
         }
 
-        /**
-         * Calculates a Curve25519 signature.
-         *
-         * @param privateKey The private Curve25519 key to create the signature with.
-         * @param message The message to sign.
-         * @return A 64-byte signature.
-         */
+        /// <summary>
+        /// Calculates a Curve25519 signature.
+        /// </summary>
+        /// <param name="privateKey">The private Curve25519 key to create the signature with.</param>
+        /// <param name="message">The message to sign.</param>
+        /// <returns>A 64-byte signature.</returns>
         public byte[] calculateSignature(byte[] privateKey, byte[] message)
         {
             if (privateKey == null || privateKey.Length != 32)
@@ -169,14 +163,13 @@ namespace org.whispersystems.curve25519
             return provider.calculateSignature(random, privateKey, message);
         }
 
-        /**
-         * Verify a Curve25519 signature.
-         *
-         * @param publicKey The Curve25519 public key the signature belongs to.
-         * @param message The message that was signed.
-         * @param signature The signature to verify.
-         * @return true if valid, false if not.
-         */
+        /// <summary>
+        /// Verify a Curve25519 signature.
+        /// </summary>
+        /// <param name="publicKey">The Curve25519 public key the signature belongs to.</param>
+        /// <param name="message">The message that was signed.</param>
+        /// <param name="signature">The signature to verify.</param>
+        /// <returns>true if valid, false if not.</returns>
         public bool verifySignature(byte[] publicKey, byte[] message, byte[] signature)
         {
             if (publicKey == null || publicKey.Length != 32)
@@ -192,13 +185,12 @@ namespace org.whispersystems.curve25519
             return provider.verifySignature(publicKey, message, signature);
         }
 
-        /**
-         * Calculates a Unique Curve25519 signature.
-         *
-         * @param privateKey The private Curve25519 key to create the signature with.
-         * @param message The message to sign.
-         * @return A 96-byte signature.
-         */
+        /// <summary>
+        /// Calculates a Unique Curve25519 signature.
+        /// </summary>
+        /// <param name="privateKey">The private Curve25519 key to create the signature with.</param>
+        /// <param name="message">The message to sign.</param>
+        /// <returns>A 96-byte signature.</returns>
         public byte[] calculateUniqueSignature(byte[] privateKey, byte[] message)
         {
             if (privateKey == null || privateKey.Length != 32)
@@ -210,14 +202,13 @@ namespace org.whispersystems.curve25519
             return provider.calculateUniqueSignature(random, privateKey, message);
         }
 
-        /**
-         * Verify a Unique Curve25519 signature.
-         * 
-         * @param publicKey The Curve25519 public key the unique signature belongs to.
-         * @param message The message that was signed.
-         * @param signature The unique signature to verify.
-         * @return true if valid, false if not.
-         */
+        /// <summary>
+        /// Verify a Unique Curve25519 signature.
+        /// </summary>
+        /// <param name="publicKey">The Curve25519 public key the unique signature belongs to.</param>
+        /// <param name="message">The message that was signed.</param>
+        /// <param name="signature">The unique signature to verify.</param>
+        /// <returns>true if valid, false if not.</returns>
         public bool verifyUniqueSignature(byte[] publicKey, byte[] message, byte[] signature)
         {
             if (publicKey == null || publicKey.Length != 32)

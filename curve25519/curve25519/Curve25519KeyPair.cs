@@ -34,17 +34,19 @@ namespace org.whispersystems.curve25519
             this.privateKey = privateKey;
         }
 
-        /**
-         * @return The Curve25519 public key.
-         */
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns>The Curve25519 public key.</returns>
         public byte[] getPublicKey()
         {
             return publicKey;
         }
 
-        /**
-         * @return The Curve25519 private key.
-         */
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns>The Curve25519 private key.</returns>
         public byte[] getPrivateKey()
         {
             return privateKey;
