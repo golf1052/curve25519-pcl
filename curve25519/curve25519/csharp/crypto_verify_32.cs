@@ -23,12 +23,17 @@ namespace org.whispersystems.curve25519.csharp
 
         public static int crypto_verify_32(byte[] x, byte[] y)
         {
+            return crypto_verify_32(x, y, 32);
+        }
+
+        public static int crypto_verify_32(byte[] x, byte[] y, int length)
+        {
             int differentbits = 0;
-            for (int count = 0; count < 32; count++)
+            for (int count = 0; count < length; count++)
             {
                 differentbits |= (x[count] ^ y[count]);
             }
-            return differentbits;
+            return (1 & ((differentbits - 1) >> 8)) - 1;
         }
 
         public static int crypto_verify_32(int[] x, int[] y)
@@ -38,7 +43,7 @@ namespace org.whispersystems.curve25519.csharp
             {
                 differentbits |= (x[count] ^ y[count]);
             }
-            return differentbits;
+            return (1 & ((differentbits - 1) >> 8)) - 1;
         }
     }
 }

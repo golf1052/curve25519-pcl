@@ -131,11 +131,6 @@ namespace curve25519Tests
             scalar[0] = 100;
             Ge_scalarmult_base.ge_scalarmult_base(B100, scalar);
 
-            int b0 = Ge_is_small_order.ge_is_small_order(B0);
-            int b1 = Ge_is_small_order.ge_is_small_order(B1);
-            int b2 = Ge_is_small_order.ge_is_small_order(B2);
-            int b100 = Ge_is_small_order.ge_is_small_order(B100);
-
             Assert.IsTrue(Ge_is_small_order.ge_is_small_order(B0) != 0 &&
                 Ge_is_small_order.ge_is_small_order(B1) == 0 &&
                 Ge_is_small_order.ge_is_small_order(B2) == 0 &&

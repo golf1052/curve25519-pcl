@@ -1,20 +1,22 @@
-﻿/** 
- * Copyright (C) 2016 golf1052
- * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+﻿
 
+using System;
+/** 
+* Copyright (C) 2016 golf1052
+* 
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+* 
+* You should have received a copy of the GNU General Public License
+* along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 namespace org.whispersystems.curve25519.csharp
 {
     public class Fe_sqrt
@@ -59,7 +61,11 @@ namespace org.whispersystems.curve25519.csharp
             /* note b^4 == a^2, so b^2 == a or -a
              * if b^2 != a, multiply it by sqrt(-1) */
             Fe_mul.fe_mul(bi, b, i);
-            Fe_cmov.fe_cmov(b, bi, Crypto_verify_32.crypto_verify_32(a, b2) & 1);
+            byte[] aCopy = new byte[a.Length * sizeof(int)];
+            Buffer.BlockCopy(a, 0, aCopy, 0, aCopy.Length);
+            byte[] b2Copy = new byte[b2.Length * sizeof(int)];
+            Buffer.BlockCopy(b2, 0, b2Copy, 0, b2Copy.Length);
+            Fe_cmov.fe_cmov(b, bi, Crypto_verify_32.crypto_verify_32(aCopy, b2Copy, aCopy.Length) & 1);
             Fe_copy.fe_copy(iOut, b);
 
             /* PRECONDITION: out^2 == a */
