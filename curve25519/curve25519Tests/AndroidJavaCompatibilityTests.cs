@@ -345,6 +345,7 @@ namespace curve25519Tests
         }
 
         [TestMethod]
+        [TestCategory("Long")]
         public void curvesigs_slow_test()
         {
             int iterations = 10000;
@@ -415,6 +416,7 @@ namespace curve25519Tests
         }
 
         [TestMethod]
+        [TestCategory("Long")]
         public void xeddsa_slow_test()
         {
             int iterations = 10000;
@@ -481,6 +483,7 @@ namespace curve25519Tests
         }
 
         [TestMethod]
+        [TestCategory("Long")]
         public void xeddsa_to_curvesigs_slow_test()
         {
             int iterations = 10000;
@@ -559,6 +562,7 @@ namespace curve25519Tests
         }
 
         [TestMethod]
+        [TestCategory("Very Long")]
         public void vxeddsa_slow_test()
         {
             int iterations = 10000000;

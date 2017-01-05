@@ -191,7 +191,7 @@ namespace org.whispersystems.curve25519
         /// <param name="privateKey">The private Curve25519 key to create the signature with.</param>
         /// <param name="message">The message to sign.</param>
         /// <returns>A 96-byte signature.</returns>
-        public byte[] calculateUniqueSignature(byte[] privateKey, byte[] message)
+        public byte[] calculateVrfSignature(byte[] privateKey, byte[] message)
         {
             if (privateKey == null || privateKey.Length != 32)
             {
@@ -199,7 +199,7 @@ namespace org.whispersystems.curve25519
             }
 
             byte[] random = provider.getRandom(64);
-            return provider.calculateUniqueSignature(random, privateKey, message);
+            return provider.calculateVrfSignature(random, privateKey, message);
         }
 
         /// <summary>
@@ -209,7 +209,7 @@ namespace org.whispersystems.curve25519
         /// <param name="message">The message that was signed.</param>
         /// <param name="signature">The unique signature to verify.</param>
         /// <returns>The vrf for this signature</returns>
-        public byte[] verifyUniqueSignature(byte[] publicKey, byte[] message, byte[] signature)
+        public byte[] verifyVrfSignature(byte[] publicKey, byte[] message, byte[] signature)
         {
             if (publicKey == null || publicKey.Length != 32)
             {
@@ -218,10 +218,10 @@ namespace org.whispersystems.curve25519
 
             if (message == null || signature == null || signature.Length != 96)
             {
-                throw new UniqueSignatureVerificationFailedException("Invalid message or signature format");
+                throw new VrfSignatureVerificationFailedException("Invalid message or signature format");
             }
 
-            return provider.verifyUniqueSignature(publicKey, message, signature);
+            return provider.verifyVrfSignature(publicKey, message, signature);
         }
 
         private static Curve25519Provider constructCSharpProvider(csharp.ISha512 sha, SecureRandomProvider random)

@@ -19,17 +19,17 @@ using System;
 
 namespace org.whispersystems.curve25519
 {
-    public class UniqueSignatureVerificationFailedException : Exception
+    public class VrfSignatureVerificationFailedException : Exception
     {
-        public UniqueSignatureVerificationFailedException() : base()
+        public VrfSignatureVerificationFailedException() : base()
         {
         }
 
-        public UniqueSignatureVerificationFailedException(string message) : base(message)
+        public VrfSignatureVerificationFailedException(string message) : base(message)
         {
         }
 
-        public UniqueSignatureVerificationFailedException(string message, Exception exception) : base(message, exception)
+        public VrfSignatureVerificationFailedException(string message, Exception exception) : base(message, exception)
         {
         }
     }

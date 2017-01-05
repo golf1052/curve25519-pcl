@@ -36,7 +36,7 @@ namespace org.whispersystems.curve25519
         public abstract void setRandomProvider(SecureRandomProvider provider);
         public abstract void setSha512Provider(ISha512 provider);
         public abstract bool verifySignature(byte[] publicKey, byte[] message, byte[] signature);
-        public abstract byte[] calculateUniqueSignature(byte[] random, byte[] privateKey, byte[] message);
-        public abstract byte[] verifyUniqueSignature(byte[] publicKey, byte[] message, byte[] signature);
+        public abstract byte[] calculateVrfSignature(byte[] random, byte[] privateKey, byte[] message);
+        public abstract byte[] verifyVrfSignature(byte[] publicKey, byte[] message, byte[] signature);
     }
 }

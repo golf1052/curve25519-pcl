@@ -196,8 +196,8 @@ namespace Curve25519WinRT.WindowsPhone_Tests
                 byte[] message = new byte[i];
                 random.NextBytes(message);
 
-                byte[] signature = curve25519.calculateUniqueSignature(keys.getPrivateKey(), message);
-                byte[] vrf = curve25519.verifyUniqueSignature(keys.getPublicKey(), message, signature);
+                byte[] signature = curve25519.calculateVrfSignature(keys.getPrivateKey(), message);
+                byte[] vrf = curve25519.verifyVrfSignature(keys.getPublicKey(), message, signature);
 
                 Assert.IsFalse(curve25519.verifySignature(keys.getPublicKey(), message, signature));
 
@@ -205,10 +205,10 @@ namespace Curve25519WinRT.WindowsPhone_Tests
 
                 try
                 {
-                    curve25519.verifyUniqueSignature(keys.getPublicKey(), message, signature);
+                    curve25519.verifyVrfSignature(keys.getPublicKey(), message, signature);
                     throw new InvalidOperationException("Should have failed");
                 }
-                catch (UniqueSignatureVerificationFailedException e)
+                catch (VrfSignatureVerificationFailedException e)
                 {
                     // good
                 }
@@ -219,8 +219,8 @@ namespace Curve25519WinRT.WindowsPhone_Tests
         public void testUniqueSignatureVector()
         {
             Curve25519KeyPair keys = new Curve25519KeyPair(PUBLIC_KEY, PRIVATE_KEY);
-            byte[] signature = curve25519.calculateUniqueSignature(keys.getPrivateKey(), MESSAGE);
-            byte[] vrf = curve25519.verifyUniqueSignature(keys.getPublicKey(), MESSAGE, signature);
+            byte[] signature = curve25519.calculateVrfSignature(keys.getPrivateKey(), MESSAGE);
+            byte[] vrf = curve25519.verifyVrfSignature(keys.getPublicKey(), MESSAGE, signature);
 
             CollectionAssert.AreEqual(VRF, vrf);
         }

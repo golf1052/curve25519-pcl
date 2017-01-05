@@ -104,7 +104,7 @@ namespace org.whispersystems.curve25519
             return Curve_sigs.curve25519_verify(sha512provider, signature, publicKey, message, message.Length) == 0;
         }
 
-        public override byte[] calculateUniqueSignature(byte[] random, byte[] privateKey, byte[] message)
+        public override byte[] calculateVrfSignature(byte[] random, byte[] privateKey, byte[] message)
         {
             byte[] signature = new byte[96];
 
@@ -116,7 +116,7 @@ namespace org.whispersystems.curve25519
             return signature;
         }
 
-        public override byte[] verifyUniqueSignature(byte[] publicKey, byte[] message, byte[] signature)
+        public override byte[] verifyVrfSignature(byte[] publicKey, byte[] message, byte[] signature)
         {
             byte[] vrf = new byte[32];
             int result = vxeddsa.vxed25519_verify(sha512provider, vrf, signature, publicKey, message, message.Length);
@@ -127,7 +127,7 @@ namespace org.whispersystems.curve25519
             }
             else
             {
-                throw new UniqueSignatureVerificationFailedException("Invalid signature");
+                throw new VrfSignatureVerificationFailedException("Invalid signature");
             }
         }
 

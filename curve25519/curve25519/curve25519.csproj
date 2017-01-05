@@ -132,7 +132,7 @@
     <Compile Include="pcl\IPclCloneable.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SecureRandomProvider.cs" />
-    <Compile Include="UniqueSignatureVerificationFailedException.cs" />
+    <Compile Include="VrfSignatureVerificationFailedException.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="bc-crypto\README.md" />
