@@ -15,39 +15,27 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using System.Diagnostics;
-
 namespace org.whispersystems.curve25519.csharp
 {
-    public class utility
+    public class Sc_cmov
     {
-        public static void print_vector(string name, byte[] v)
+        public static void sc_cmov(byte[] f, byte[] g, byte b)
         {
-            int count;
-            Debug.WriteLine($"{name} = ");
+            int count = 32;
+            byte[] x = new byte[32];
             for (count = 0; count < 32; count++)
             {
-                Debug.WriteLine("{0:X2}", v[count]);
+                x[count] = (byte)(f[count] ^ g[count]);
             }
-            Debug.WriteLine("");
-        }
-
-        public static void print_bytes(string name, byte[] v, int numbytes)
-        {
-            int count;
-            Debug.WriteLine($"{name} = ");
-            for (count = 0; count < numbytes; count++)
+            b = (byte)-b;
+            for (count = 0; count < 32; count++)
             {
-                Debug.WriteLine("{0:X2}", v[count]);
+                x[count] &= b;
             }
-            Debug.WriteLine("");
-        }
-
-        public static void print_fe(string name, int[] iIn)
-        {
-            byte[] bytes = new byte[32];
-            Fe_tobytes.fe_tobytes(bytes, iIn);
-            print_vector(name, bytes);
+            for (count = 0; count < 32; count++)
+            {
+                f[count] = (byte)(f[count] ^ x[count]);
+            }
         }
     }
 }

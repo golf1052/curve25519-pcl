@@ -51,7 +51,7 @@
 
             Fe_mul.fe_mul(x, u, A);                     /* x = u * sqrt(-(A+2)) */
             Fe_invert.fe_invert(iv, v);                 /* 1/v */
-            Fe_mul.fe_mul(x, x, iv);                    /* x = (u/v) * sqrt(A+2) */
+            Fe_mul.fe_mul(x, x, iv);                    /* x = (u/v) * sqrt(-(A+2)) */
 
             Fe_neg.fe_neg(nx, x);                       /* negate x to match sign bit */
             Fe_cmov.fe_cmov(x, nx, Fe_isnegative.fe_isnegative(x) ^ ed_sign_bit);
@@ -59,21 +59,6 @@
             Fe_copy.fe_copy(p.X, x);
             Fe_copy.fe_copy(p.Y, y);
             Fe_1.fe_1(p.Z);
-
-            /* POSTCONDITION: check that p maps back to u */
-            //#ifndef NDEBUG
-            //{
-            //fe one, u1, u2, ucheck;
-            //
-            //fe_1(one);
-            //fe_add(u1, one, p->Y);
-            //fe_sub(u2, one, p->Y);
-            //fe_invert(u2, u2);
-            //fe_mul(ucheck, u1, u2);
-            //
-            //assert(fe_isequal(u, ucheck));
-            //}
-            //#endif
 
             /* POSTCONDITION: check that p->X and p->Y satisfy the Ed curve equation */
             /* -x^2 + y^2 = 1 + dx^2y^2 */

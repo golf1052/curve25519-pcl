@@ -91,7 +91,7 @@ namespace org.whispersystems.curve25519
         {
             byte[] result = new byte[64];
 
-            if (xdsa.xdsa_sign(sha512provider, result, privateKey, message, message.Length, random) != 0)
+            if (xeddsa.xed25519_sign(sha512provider, result, privateKey, message, message.Length, random) != 0)
             {
                 throw new ArgumentException("Message exceeds max length!");
             }
@@ -108,7 +108,7 @@ namespace org.whispersystems.curve25519
         {
             byte[] signature = new byte[96];
 
-            if (uxdsa.uxdsa_sign(sha512provider, signature, privateKey, message, message.Length, random) != 0)
+            if (uxeddsa.uxed25519_sign(sha512provider, signature, privateKey, message, message.Length, random) != 0)
             {
                 throw new ArgumentException("Signature failed!");
             }
@@ -118,7 +118,7 @@ namespace org.whispersystems.curve25519
 
         public override bool verifyUniqueSignature(byte[] publicKey, byte[] message, byte[] signature)
         {
-            return uxdsa.uxdsa_verify(sha512provider, signature, publicKey, message, message.Length) == 0;
+            return uxeddsa.uxed25519_verify(sha512provider, signature, publicKey, message, message.Length) == 0;
         }
 
         public override byte[] getRandom(int length)

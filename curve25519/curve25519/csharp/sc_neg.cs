@@ -1,5 +1,5 @@
 ﻿/** 
- * Copyright (C) 2016 golf1052
+ * Copyright (C) 2017 golf1052
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ namespace org.whispersystems.curve25519.csharp
          *                               0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0, 0x10};
          */
 
-        public static byte[] Lminus1 = new byte[]
+        private static byte[] Lminus1 = new byte[]
         {
             0xec, 0xd3, 0xf5, 0x5c, 0x1a, 0x63, 0x12, 0x58,
             0xd6, 0x9c, 0xf7, 0xa2, 0xde, 0xf9, 0xde, 0x14,

@@ -103,6 +103,7 @@
     <Compile Include="csharp\open_modified.cs" />
     <Compile Include="csharp\scalarmult.cs" />
     <Compile Include="csharp\sc_clamp.cs" />
+    <Compile Include="csharp\sc_cmov.cs" />
     <Compile Include="csharp\sc_muladd.cs" />
     <Compile Include="csharp\sc_neg.cs" />
     <Compile Include="csharp\sc_reduce.cs" />
@@ -111,8 +112,8 @@
     <Compile Include="csharp\uopen_modified.cs" />
     <Compile Include="csharp\usign_modified.cs" />
     <Compile Include="csharp\utility.cs" />
-    <Compile Include="csharp\uxdsa.cs" />
-    <Compile Include="csharp\xdsa.cs" />
+    <Compile Include="csharp\uxeddsa.cs" />
+    <Compile Include="csharp\xeddsa.cs" />
     <Compile Include="csharp\zeroize.cs" />
     <Compile Include="Curve25519.cs" />
     <Compile Include="Curve25519KeyPair.cs" />

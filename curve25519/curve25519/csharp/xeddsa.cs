@@ -19,9 +19,9 @@ using System;
 
 namespace org.whispersystems.curve25519.csharp
 {
-    public class xdsa
+    public class xeddsa
     {
-        public static int xdsa_sign(ISha512 sha512provider,
+        public static int xed25519_sign(ISha512 sha512provider,
             byte[] signature_out,
             byte[] curve25519_privkey,
             byte[] msg, int msg_len,
@@ -29,6 +29,7 @@ namespace org.whispersystems.curve25519.csharp
         {
             byte[] a = new byte[32];
             byte[] A = new byte[32];
+            byte[] aneg = new byte[32];
             Ge_p3 ed_pubkey_point = new Ge_p3();
             // see link below
             byte[] sigbuf = new byte[msg_len + 128]; /* working buffer */
@@ -47,16 +48,11 @@ namespace org.whispersystems.curve25519.csharp
             Ge_p3_tobytes.ge_p3_tobytes(A, ed_pubkey_point);
 
             /* Force Edwards sign bit to zero */
-            sign_bit = (byte)(A[31] & 0x80);
-            if (sign_bit != 0)
-            {
-                Sc_neg.sc_neg(a, curve25519_privkey);
-                A[31] &= 0x7F;
-            }
-            else
-            {
-                Array.Copy(curve25519_privkey, 0, a, 0, 32);
-            }
+            sign_bit = (byte)((A[31] & 0x80) >> 7);
+            Array.Copy(curve25519_privkey, 0, a, 0, 32);
+            Sc_neg.sc_neg(aneg, a);
+            Sc_cmov.sc_cmov(a, aneg, sign_bit);
+            A[31] &= 0x7F;
 
             /* Perform an Ed25519 signature with explicit private key */
             sign_modified.crypto_sign_modified(sha512provider, sigbuf, msg, msg_len, a, A, random);
@@ -66,7 +62,7 @@ namespace org.whispersystems.curve25519.csharp
             return 0;
         }
 
-        public static int xdsa_verify(ISha512 sha512provider, byte[] signature, byte[] curve25519_pubkey, byte[] msg, int msg_len)
+        public static int xed25519_verify(ISha512 sha512provider, byte[] signature, byte[] curve25519_pubkey, byte[] msg, int msg_len)
         {
             int[] u = new int[10];
             int[] y = new int[10];
