@@ -1,5 +1,5 @@
 ﻿/** 
- * Copyright (C) 2016 langboost, golf1052
+ * Copyright (C) 2017 langboost, golf1052
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -208,8 +208,8 @@ namespace org.whispersystems.curve25519
         /// <param name="publicKey">The Curve25519 public key the unique signature belongs to.</param>
         /// <param name="message">The message that was signed.</param>
         /// <param name="signature">The unique signature to verify.</param>
-        /// <returns>true if valid, false if not.</returns>
-        public bool verifyUniqueSignature(byte[] publicKey, byte[] message, byte[] signature)
+        /// <returns>The vrf for this signature</returns>
+        public byte[] verifyUniqueSignature(byte[] publicKey, byte[] message, byte[] signature)
         {
             if (publicKey == null || publicKey.Length != 32)
             {
@@ -218,7 +218,7 @@ namespace org.whispersystems.curve25519
 
             if (message == null || signature == null || signature.Length != 96)
             {
-                return false;
+                throw new UniqueSignatureVerificationFailedException("Invalid message or signature format");
             }
 
             return provider.verifyUniqueSignature(publicKey, message, signature);

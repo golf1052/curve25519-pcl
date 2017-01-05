@@ -1,5 +1,5 @@
 ﻿/** 
- * Copyright (C) 2016 golf1052
+ * Copyright (C) 2017 golf1052
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,10 @@ namespace org.whispersystems.curve25519.csharp
 {
     public class open_modified
     {
-        public static int crypto_sign_open_modified(ISha512 sha512provider, byte[] m, long mlen, byte[] sm, long smlen, byte[] pk)
+        public static int crypto_sign_open_modified(ISha512 sha512provider,
+            byte[] m,
+            byte[] sm, long smlen,
+            byte[] pk)
         {
             byte[] pkcopy = new byte[32];
             byte[] rcopy = new byte[32];
@@ -58,9 +61,6 @@ namespace org.whispersystems.curve25519.csharp
 
             if (Crypto_verify_32.crypto_verify_32(rcheck, rcopy) == 0)
             {
-                Array.Copy(m, 64, m, 0, (int)smlen - 64);
-                //memset(m + smlen - 64,0,64);
-                //*mlen = smlen - 64;
                 return 0;
             }
 

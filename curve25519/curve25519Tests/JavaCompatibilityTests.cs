@@ -1,5 +1,5 @@
 ﻿/** 
- * Copyright (C) 2016 langboost, golf1052
+ * Copyright (C) 2017 langboost, golf1052
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,6 +36,12 @@ namespace Curve25519WinRT.WindowsPhone_Tests
     [TestClass]
     public class JavaCompatibilityTests
     {
+        private byte[] PUBLIC_KEY = new byte[] { 0x21, 0xf7, 0x34, 0x5f, 0x56, 0xd9, 0x60, 0x2f, 0x15, 0x23, 0x29, 0x8f, 0x4f, 0x6f, 0xce, 0xcb, 0x14, 0xdd, 0xe2, 0xd5, 0xb9, 0xa9, 0xb4, 0x8b, 0xca, 0x82, 0x42, 0x68, 0x14, 0x92, 0xb9, 0x20 };
+        private byte[] PRIVATE_KEY = new byte[] { 0x38, 0x61, 0x1d, 0x25, 0x3b, 0xea, 0x85, 0xa2, 0x03, 0x80, 0x53, 0x43, 0xb7, 0x4a, 0x93, 0x6d, 0x3b, 0x13, 0xb9, 0xe3, 0x12, 0x14, 0x53, 0xe9, 0x74, 0x0b, 0x6b, 0x82, 0x7e, 0x33, 0x7e, 0x5d };
+
+        private byte[] MESSAGE = new byte[] { 0x54, 0x68, 0x69, 0x73, 0x20, 0x69, 0x73, 0x20, 0x75, 0x6e, 0x69, 0x71, 0x75, 0x65, 0x2e };
+        private byte[] VRF = new byte[] { 0x75, 0xad, 0x49, 0xbc, 0x95, 0x5f, 0x38, 0xdc, 0xf6, 0x5f, 0xb6, 0x72, 0x08, 0x6b, 0xd5, 0x09, 0xcb, 0x4b, 0x4c, 0x41, 0x04, 0x7d, 0xb1, 0x7e, 0xfd, 0xaf, 0xee, 0xbc, 0x33, 0x03, 0x71, 0xe6 };
+
         #region Test helper code
         private Curve25519 curve25519;
         private const int EXPECTED_LEN = 32;
@@ -191,14 +197,32 @@ namespace Curve25519WinRT.WindowsPhone_Tests
                 random.NextBytes(message);
 
                 byte[] signature = curve25519.calculateUniqueSignature(keys.getPrivateKey(), message);
+                byte[] vrf = curve25519.verifyUniqueSignature(keys.getPublicKey(), message, signature);
 
-                Assert.IsTrue(curve25519.verifyUniqueSignature(keys.getPublicKey(), message, signature));
                 Assert.IsFalse(curve25519.verifySignature(keys.getPublicKey(), message, signature));
 
                 message[Math.Abs(random.Next(int.MaxValue)) % message.Length] ^= 0x01;
 
-                Assert.IsFalse(curve25519.verifyUniqueSignature(keys.getPublicKey(), message, signature));
+                try
+                {
+                    curve25519.verifyUniqueSignature(keys.getPublicKey(), message, signature);
+                    throw new InvalidOperationException("Should have failed");
+                }
+                catch (UniqueSignatureVerificationFailedException e)
+                {
+                    // good
+                }
             }
+        }
+
+        [TestMethod]
+        public void testUniqueSignatureVector()
+        {
+            Curve25519KeyPair keys = new Curve25519KeyPair(PUBLIC_KEY, PRIVATE_KEY);
+            byte[] signature = curve25519.calculateUniqueSignature(keys.getPrivateKey(), MESSAGE);
+            byte[] vrf = curve25519.verifyUniqueSignature(keys.getPublicKey(), MESSAGE, signature);
+
+            CollectionAssert.AreEqual(VRF, vrf);
         }
     }
 }

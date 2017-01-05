@@ -1,5 +1,5 @@
 ﻿/** 
- * Copyright (C) 2016 golf1052
+ * Copyright (C) 2017 golf1052
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -87,84 +87,6 @@ namespace curve25519Tests
         }
 
         [TestMethod]
-        public void ge_is_small_order_test()
-        {
-            Ge_p3 o1 = new Ge_p3();
-            Ge_p3 o2 = new Ge_p3();
-            Ge_p3 o4a = new Ge_p3();
-            Ge_p3 o4b = new Ge_p3();
-
-            int[] zero = new int[10];
-            int[] one = new int[10];
-            int[] minusone = new int[10];
-
-            Fe_0.fe_0(zero);
-            Fe_1.fe_1(one);
-            Fe_sub.fe_sub(minusone, zero, one);
-
-            // o1 is the neutral point (order 1)
-            Fe_copy.fe_copy(o1.X, zero);
-            Fe_copy.fe_copy(o1.Y, one);
-            Fe_copy.fe_copy(o1.Z, one);
-            Fe_mul.fe_mul(o1.T, o1.X, o1.Y);
-
-            // o2 is the order 2 point
-            Fe_copy.fe_copy(o2.X, zero);
-            Fe_copy.fe_copy(o2.Y, minusone);
-            Fe_copy.fe_copy(o2.Z, one);
-            Fe_mul.fe_mul(o2.T, o2.X, o2.Y);
-
-            /* TODO check order 8 points */
-
-            /* sqrt(-1) */
-            byte[] i_bytes = new byte[]
-            {
-                0xb0, 0xa0, 0x0e, 0x4a, 0x27, 0x1b, 0xee, 0xc4,
-                0x78, 0xe4, 0x2f, 0xad, 0x06, 0x18, 0x43, 0x2f,
-                0xa7, 0xd7, 0xfb, 0x3d, 0x99, 0x00, 0x4d, 0x2b,
-                0x0b, 0xdf, 0xc1, 0x4f, 0x80, 0x24, 0x83, 0x2b
-            };
-            int[] i = new int[10];
-            Fe_frombytes.fe_frombytes(i, i_bytes);
-
-            Fe_copy.fe_copy(o4a.X, i);
-            Fe_copy.fe_copy(o4a.Y, zero);
-            Fe_copy.fe_copy(o4a.Z, one);
-            Fe_mul.fe_mul(o4a.T, o4a.X, o4a.Y);
-
-            Fe_neg.fe_neg(o4b.X, o4a.X);
-            Fe_copy.fe_copy(o4b.Y, zero);
-            Fe_copy.fe_copy(o4b.Z, one);
-            Fe_mul.fe_mul(o4b.T, o4b.X, o4b.Y);
-
-            Assert.IsTrue(
-                Ge_is_small_order.ge_is_small_order(o1) != 0 && Ge_is_small_order.ge_is_small_order(o2) != 0 &&
-                Ge_is_small_order.ge_is_small_order(o4a) != 0 && Ge_is_small_order.ge_is_small_order(o4b) != 0,
-                "ge_is_small_order #1");
-
-            Ge_p3 B0 = new Ge_p3();
-            Ge_p3 B1 = new Ge_p3();
-            Ge_p3 B2 = new Ge_p3();
-            Ge_p3 B100 = new Ge_p3();
-            byte[] scalar = new byte[32];
-
-            Ge_scalarmult_base.ge_scalarmult_base(B0, scalar);
-            scalar[0] = 1;
-            Ge_scalarmult_base.ge_scalarmult_base(B1, scalar);
-            scalar[0] = 2;
-            Ge_scalarmult_base.ge_scalarmult_base(B2, scalar);
-            scalar[0] = 100;
-            Ge_scalarmult_base.ge_scalarmult_base(B100, scalar);
-
-            Assert.IsTrue(Ge_is_small_order.ge_is_small_order(B0) != 0 &&
-                Ge_is_small_order.ge_is_small_order(B1) == 0 &&
-                Ge_is_small_order.ge_is_small_order(B2) == 0 &&
-                Ge_is_small_order.ge_is_small_order(B100) == 0,
-                "ge_is_small_order #2");
-
-        }
-
-        [TestMethod]
         public void elligator_fast_test()
         {
             byte[] elligator_correct_output = new byte[]
@@ -191,12 +113,12 @@ namespace curve25519Tests
                 0x61, 0x52, 0x1d, 0xf9, 0x2c, 0x5c, 0xba, 0x77
             };
 
-            byte[] calculateu_correct_output = new byte[]
+            byte[] calculatev_correct_output = new byte[]
             {
-                0xa8, 0x36, 0xb5, 0x30, 0xd3, 0xe7, 0x65, 0x54,
-                0x3e, 0x72, 0xc8, 0x87, 0x7d, 0xa4, 0x12, 0x6d,
-                0x77, 0xbf, 0x22, 0x0b, 0x72, 0xd5, 0xad, 0x6b,
-                0xb6, 0xc2, 0x16, 0xb2, 0x92, 0x5f, 0x0f, 0x2a
+                0x1b, 0x77, 0xb5, 0xa0, 0x44, 0x84, 0x7e, 0xb9,
+                0x23, 0xd7, 0x93, 0x18, 0xce, 0xc2, 0xc5, 0xe2,
+                0x84, 0xd5, 0x79, 0x6f, 0x65, 0x63, 0x1b, 0x60,
+                0x9b, 0xf1, 0xf8, 0xce, 0x88, 0x0b, 0x50, 0x9c,
             };
 
             int count;
@@ -220,22 +142,22 @@ namespace curve25519Tests
             Elligator.elligator(iOut, iIn);
             CollectionAssert.AreEqual(iOut, iIn, "Elligator(0) == 0");
 
-            /* ge_montx_to_p2(0) -> order2 point test */
+            /* ge_montx_to_p3(0) -> order2 point test */
             int[] one = new int[10];
             int[] negone = new int[10];
             int[] zero = new int[10];
             Fe_1.fe_1(one);
             Fe_0.fe_0(zero);
             Fe_sub.fe_sub(negone, zero, one);
-            Ge_p2 p2 = new Ge_p2();
-            Ge_montx_to_p2.ge_montx_to_p2(p2, zero, 0);
-            Assert.IsTrue(Fe_isequal.fe_isequal(p2.X, zero) != 0 &&
-                Fe_isequal.fe_isequal(p2.Y, negone) != 0 &&
-                Fe_isequal.fe_isequal(p2.Z, one) != 0,
-                "ge_montx_to_p2(0) == order 2 point");
+            Ge_p3 p3 = new Ge_p3();
+            Ge_montx_to_p3.ge_montx_to_p3(p3, zero, 0);
+            Assert.IsTrue(Fe_isequal.fe_isequal(p3.X, zero) != 0 &&
+                Fe_isequal.fe_isequal(p3.Y, negone) != 0 &&
+                Fe_isequal.fe_isequal(p3.Z, one) != 0 &&
+                Fe_isequal.fe_isequal(p3.T, zero) != 0,
+                "ge_montx_to_p3(0) == order 2 point");
 
             /* Hash to point vector test */
-            Ge_p3 p3 = new Ge_p3();
             byte[] htp = new byte[32];
 
             for (count = 0; count < 32; count++)
@@ -258,22 +180,24 @@ namespace curve25519Tests
             CollectionAssert.AreEqual(hashtopoint_correct_output2, htp, "hash_to_point #2");
 
             /* calculate_U vector test */
-            Ge_p3 Bu = new Ge_p3();
-            byte[] U = new byte[32];
-            byte[] Ubuf = new byte[200];
+            Ge_p3 Bv = new Ge_p3();
+            byte[] V = new byte[32];
+            byte[] Vbuf = new byte[200];
             byte[] a = new byte[32];
-            byte[] Umsg = new byte[3];
-            Umsg[0] = 0;
-            Umsg[1] = 1;
-            Umsg[2] = 2;
+            byte[] A = new byte[32];
+            byte[] Vmsg = new byte[3];
+            Vmsg[0] = 0;
+            Vmsg[1] = 1;
+            Vmsg[2] = 2;
             for (count = 0; count < 32; count++)
             {
                 a[count] = (byte)(8 + count);
+                A[count] = (byte)(9 + count);
             }
             Sc_clamp.sc_clamp(a);
-            Elligator.calculate_Bu_and_U(sha512provider, Bu, U, Ubuf, a, Umsg, 3);
+            Elligator.calculate_Bv_and_V(sha512provider, Bv, V, Vbuf, a, A, Vmsg, 3);
 
-            CollectionAssert.AreEqual(calculateu_correct_output, U, "calculate_Bu_and_U vector");
+            CollectionAssert.AreEqual(calculatev_correct_output, V, "calculate_Bv_and_V vector");
         }
 
         [TestMethod]
@@ -356,22 +280,22 @@ namespace curve25519Tests
         }
 
         [TestMethod]
-        public void uxeddsa_fast_test()
+        public void vxeddsa_fast_test()
         {
             byte[] signature_correct = new byte[]
             {
-                0x66, 0x51, 0x0b, 0x68, 0x9e, 0xb7, 0xd8, 0x55,
-                0x04, 0x62, 0xaf, 0x52, 0x0c, 0x89, 0x69, 0xe8,
-                0xa9, 0xa5, 0x3d, 0xf3, 0x8e, 0xd6, 0xe6, 0x0f,
-                0xe8, 0xfe, 0xd6, 0xa8, 0x95, 0x66, 0x9c, 0x19,
-                0x66, 0x4a, 0x65, 0x25, 0xff, 0xb7, 0x47, 0x74,
-                0x8e, 0x86, 0x40, 0x55, 0x0f, 0xb1, 0x4a, 0xd1,
-                0x6d, 0xe0, 0x3d, 0x51, 0xa2, 0xd3, 0x4d, 0xee,
-                0x64, 0x7e, 0x35, 0x98, 0x42, 0x25, 0x5a, 0x02,
-                0xf8, 0x8c, 0x1e, 0x23, 0x5b, 0xd5, 0x7f, 0xb9,
-                0x98, 0x60, 0x55, 0x63, 0xd6, 0xe0, 0x6d, 0xa1,
-                0x29, 0xd9, 0xfc, 0xee, 0x1c, 0x08, 0x6d, 0x5a,
-                0x28, 0xa1, 0x27, 0xf0, 0x06, 0xb9, 0x79, 0x03
+                0x23, 0xc6, 0xe5, 0x93, 0x3f, 0xcd, 0x56, 0x47,
+                0x7a, 0x86, 0xc9, 0x9b, 0x76, 0x2c, 0xb5, 0x24,
+                0xc3, 0xd6, 0x05, 0x55, 0x38, 0x83, 0x4d, 0x4f,
+                0x8d, 0xb8, 0xf0, 0x31, 0x07, 0xec, 0xeb, 0xa0,
+                0xa0, 0x01, 0x50, 0xb8, 0x4c, 0xbb, 0x8c, 0xcd,
+                0x23, 0xdc, 0x65, 0xfd, 0x0e, 0x81, 0xb2, 0x86,
+                0x06, 0xa5, 0x6b, 0x0c, 0x4f, 0x53, 0x6d, 0xc8,
+                0x8b, 0x8d, 0xc9, 0x04, 0x6e, 0x4a, 0xeb, 0x08,
+                0xce, 0x08, 0x71, 0xfc, 0xc7, 0x00, 0x09, 0xa4,
+                0xd6, 0xc0, 0xfd, 0x2d, 0x1a, 0xe5, 0xb6, 0xc0,
+                0x7c, 0xc7, 0x22, 0x3b, 0x69, 0x59, 0xa8, 0x26,
+                0x2b, 0x57, 0x78, 0xd5, 0x46, 0x0e, 0x0f, 0x05,
             };
             const int MSG_LEN = 200;
             byte[] privkey = new byte[32];
@@ -379,6 +303,8 @@ namespace curve25519Tests
             byte[] signature = new byte[96];
             byte[] msg = new byte[MSG_LEN];
             byte[] random = new byte[64];
+            byte[] vrf_out = new byte[32];
+            byte[] vrf_outprev = new byte[32];
 
             privkey[8] = 189; /* just so there's some bits set */
             Sc_clamp.sc_clamp(privkey);
@@ -388,15 +314,13 @@ namespace curve25519Tests
 
             ISha512 sha512provider = new BouncyCastleDotNETSha512Provider();
 
-            uxeddsa.uxed25519_sign(sha512provider, signature, privkey, msg, MSG_LEN, random);
+            vxeddsa.vxed25510_sign(sha512provider, signature, privkey, msg, MSG_LEN, random);
 
-            CollectionAssert.AreEqual(signature_correct, signature, "UXEdDSA sign");
-
-            Assert.AreEqual(0, uxeddsa.uxed25519_verify(sha512provider, signature, pubkey, msg, MSG_LEN), "UXEdDSA verify #1");
-
+            CollectionAssert.AreEqual(signature_correct, signature, "VXEdDSA sign");
+            Assert.AreEqual(0, vxeddsa.vxed25519_verify(sha512provider, vrf_out, signature, pubkey, msg, MSG_LEN), "VXEdDSA verify #1");
+            Array.Copy(vrf_out, 0, vrf_outprev, 0, 32);
             signature[0] ^= 1;
-
-            Assert.AreNotEqual(0, uxeddsa.uxed25519_verify(sha512provider, signature, pubkey, msg, MSG_LEN), "UXEdDSA verify #2");
+            Assert.AreNotEqual(0, vxeddsa.vxed25519_verify(sha512provider, vrf_out, signature, pubkey, msg, MSG_LEN), "VXEdDSA verify #2");
 
             /* Test U */
             byte[] sigprev = new byte[96];
@@ -404,19 +328,20 @@ namespace curve25519Tests
             sigprev[0] ^= 1; /* undo prev disturbance */
 
             random[0] ^= 1;
-            uxeddsa.uxed25519_sign(sha512provider, signature, privkey, msg, MSG_LEN, random);
+            vxeddsa.vxed25510_sign(sha512provider, signature, privkey, msg, MSG_LEN, random);
+            Assert.AreEqual(0, vxeddsa.vxed25519_verify(sha512provider, vrf_out, signature, pubkey, msg, MSG_LEN), "VXEdDSA verify #3");
 
-            byte[] sig0 = new byte[32];
-            Array.Copy(signature, 0, sig0, 0, 32);
-            byte[] sigprev0 = new byte[32];
-            Array.Copy(sigprev, 0, sigprev0, 0, 32);
-            CollectionAssert.AreEqual(sigprev0, sig0, "UXEdDSA U value changed");
+            byte[] vrf0 = new byte[32];
+            Array.Copy(vrf_outprev, 0, vrf0, 0, 32);
+            byte[] vrfprev0 = new byte[32];
+            Array.Copy(vrf_out, 0, vrfprev0, 0, 32);
+            CollectionAssert.AreEqual(vrfprev0, vrf0, "VXEdDSA VRF value unchanged");
 
             byte[] sig32 = new byte[64];
             Array.Copy(signature, 32, sig32, 0, 64);
             byte[] sigprev32 = new byte[64];
             Array.Copy(sigprev, 32, sigprev32, 0, 64);
-            CollectionAssert.AreNotEqual(sigprev32, sig32, "UXEdDSA (h, s) changed");
+            CollectionAssert.AreNotEqual(sigprev32, sig32, "VXEdDSA (h, s) changed");
         }
 
         [TestMethod]
@@ -634,23 +559,72 @@ namespace curve25519Tests
         }
 
         [TestMethod]
-        public void uxeddsa_slow_test()
+        public void vxeddsa_slow_test()
         {
-            int iterations = 10000;
+            int iterations = 10000000;
+            //int iterations = 100000;
             byte[] signature_10k_correct = new byte[]
             {
-                0x2d, 0x2a, 0x69, 0x20, 0x0a, 0xe7, 0x76, 0xeb,
-                0x08, 0xc0, 0x3b, 0x4f, 0x26, 0x82, 0xd5, 0x3c,
-                0x97, 0xc6, 0xb7, 0x9c, 0x6a, 0xf6, 0x24, 0x91,
-                0xe1, 0xf9, 0x8f, 0x4f, 0x23, 0xc4, 0xba, 0x28,
-                0x4b, 0x60, 0x87, 0x07, 0xe5, 0x94, 0xcb, 0xda,
-                0x1b, 0x03, 0x5a, 0xd4, 0xd0, 0x6d, 0xd9, 0xa0,
-                0x6a, 0x07, 0xee, 0x7b, 0x98, 0x7c, 0xe1, 0xc4,
-                0x91, 0x52, 0x0d, 0x08, 0x32, 0xd7, 0x10, 0x03,
-                0xbd, 0x96, 0x34, 0x11, 0x0c, 0x44, 0x56, 0x95,
-                0x8b, 0x87, 0xdb, 0x12, 0x97, 0xa9, 0x5a, 0x62,
-                0x2a, 0x34, 0xb1, 0xb1, 0xe2, 0xb4, 0xf5, 0x3c,
-                0x34, 0xb6, 0x69, 0x0b, 0x77, 0x0e, 0x49, 0x07,
+                0xa1, 0x96, 0x96, 0xe5, 0x87, 0x3f, 0x6e, 0x5c,
+                0x2e, 0xd3, 0x73, 0xab, 0x04, 0x0c, 0x1f, 0x26,
+                0x3c, 0xca, 0x52, 0xc4, 0x7e, 0x49, 0xaa, 0xce,
+                0xb5, 0xd6, 0xa2, 0x29, 0x46, 0x3f, 0x1b, 0x54,
+                0x45, 0x94, 0x9b, 0x6c, 0x27, 0xf9, 0x2a, 0xed,
+                0x17, 0xa4, 0x72, 0xbf, 0x35, 0x37, 0xc1, 0x90,
+                0xac, 0xb3, 0xfd, 0x2d, 0xf1, 0x01, 0x05, 0xbe,
+                0x56, 0x5c, 0xaf, 0x63, 0x65, 0xad, 0x38, 0x04,
+                0x70, 0x53, 0xdf, 0x2b, 0xc1, 0x45, 0xc8, 0xee,
+                0x02, 0x0d, 0x2b, 0x22, 0x23, 0x7a, 0xbf, 0xfa,
+                0x43, 0x31, 0xb3, 0xac, 0x26, 0xd9, 0x76, 0xfc,
+                0xfe, 0x30, 0xa1, 0x7c, 0xce, 0x10, 0x67, 0x0e,
+            };
+
+            byte[] signature_100k_correct = new byte[]
+            {
+                0xc9, 0x11, 0x2b, 0x55, 0xfa, 0xc4, 0xb2, 0xfe,
+                0x00, 0x7d, 0xf6, 0x45, 0xcb, 0xd2, 0x73, 0xc9,
+                0x43, 0xba, 0x20, 0xf6, 0x9c, 0x18, 0x84, 0xef,
+                0x6c, 0x65, 0x7a, 0xdb, 0x49, 0xfc, 0x1e, 0xbe,
+                0x31, 0xb3, 0xe6, 0xa4, 0x68, 0x2f, 0xd0, 0x30,
+                0x81, 0xfc, 0x0d, 0xcd, 0x2d, 0x00, 0xab, 0xae,
+                0x9f, 0x08, 0xf0, 0x99, 0xff, 0x9f, 0xdc, 0x2d,
+                0x68, 0xd6, 0xe7, 0xe8, 0x44, 0x2a, 0x5b, 0x0e,
+                0x48, 0x67, 0xe2, 0x41, 0x4a, 0xd9, 0x0c, 0x2a,
+                0x2b, 0x4e, 0x66, 0x09, 0x87, 0xa0, 0x6b, 0x3b,
+                0xd1, 0xd9, 0xa3, 0xe3, 0xa5, 0x69, 0xed, 0xc1,
+                0x42, 0x03, 0x93, 0x0d, 0xbc, 0x7e, 0xe9, 0x08,
+            };
+
+            byte[] signature_1m_correct = new byte[]
+            {
+                0xf8, 0xb1, 0x20, 0xf2, 0x1e, 0x5c, 0xbf, 0x5f,
+                0xea, 0x07, 0xcb, 0xb5, 0x77, 0xb8, 0x03, 0xbc,
+                0xcb, 0x6d, 0xf1, 0xc1, 0xa5, 0x03, 0x05, 0x7b,
+                0x01, 0x63, 0x9b, 0xf9, 0xed, 0x3e, 0x57, 0x47,
+                0xd2, 0x5b, 0xf4, 0x7e, 0x7c, 0x45, 0xce, 0xfc,
+                0x06, 0xb3, 0xf4, 0x05, 0x81, 0x9f, 0x53, 0xb0,
+                0x18, 0xe3, 0xfa, 0xcb, 0xb2, 0x52, 0x3e, 0x57,
+                0xcb, 0x34, 0xcc, 0x81, 0x60, 0xb9, 0x0b, 0x04,
+                0x07, 0x79, 0xc0, 0x53, 0xad, 0xc4, 0x4b, 0xd0,
+                0xb5, 0x7d, 0x95, 0x4e, 0xbe, 0xa5, 0x75, 0x0c,
+                0xd4, 0xbf, 0xa7, 0xc0, 0xcf, 0xba, 0xe7, 0x7c,
+                0xe2, 0x90, 0xef, 0x61, 0xa9, 0x29, 0x66, 0x0d,
+            };
+
+            byte[] signature_10m_correct = new byte[]
+            {
+                0xf5, 0xa4, 0xbc, 0xec, 0xc3, 0x3d, 0xd0, 0x43,
+                0xd2, 0x81, 0x27, 0x9e, 0xf0, 0x4c, 0xbe, 0xf3,
+                0x77, 0x01, 0x56, 0x41, 0x0e, 0xff, 0x0c, 0xb9,
+                0x66, 0xec, 0x4d, 0xe0, 0xb7, 0x25, 0x63, 0x6b,
+                0x5c, 0x08, 0x39, 0x80, 0x4e, 0x37, 0x1b, 0x2c,
+                0x46, 0x6f, 0x86, 0x99, 0x1c, 0x4e, 0x31, 0x60,
+                0xdb, 0x4c, 0xfe, 0xc5, 0xa2, 0x4d, 0x71, 0x2b,
+                0xd6, 0xd0, 0xc3, 0x98, 0x88, 0xdb, 0x0e, 0x0c,
+                0x68, 0x4a, 0xd3, 0xc7, 0x56, 0xac, 0x8d, 0x95,
+                0x7b, 0xbd, 0x99, 0x50, 0xe8, 0xd3, 0xea, 0xf3,
+                0x7b, 0x26, 0xf2, 0xa2, 0x2b, 0x02, 0x58, 0xca,
+                0xbd, 0x2c, 0x2b, 0xf7, 0x77, 0x58, 0xfe, 0x09,
             };
 
             int count;
@@ -660,13 +634,14 @@ namespace curve25519Tests
             byte[] signature = new byte[96];
             byte[] msg = new byte[MSG_LEN];
             byte[] random = new byte[64];
+            byte[] vrf_out = new byte[32];
 
             for (int i = 0; i < 96; i++)
             {
                 signature[i] = 3;
             }
 
-            Debug.WriteLine("Pseudorandom UXEdDSA...");
+            Debug.WriteLine("Pseudorandom VXEdDSA...");
             for (count = 1; count <= iterations; count++)
             {
                 byte[] b = new byte[64];
@@ -679,9 +654,9 @@ namespace curve25519Tests
                 Sc_clamp.sc_clamp(privkey);
                 Keygen.curve25519_keygen(pubkey, privkey);
 
-                uxeddsa.uxed25519_sign(sha512provider, signature, privkey, msg, MSG_LEN, random);
+                vxeddsa.vxed25510_sign(sha512provider, signature, privkey, msg, MSG_LEN, random);
 
-                Assert.AreEqual(0, uxeddsa.uxed25519_verify(sha512provider, signature, pubkey, msg, MSG_LEN), $"UXEdDSA verify failure #1 {count}");
+                Assert.AreEqual(0, vxeddsa.vxed25519_verify(sha512provider, vrf_out, signature, pubkey, msg, MSG_LEN), $"VXEdDSA verify failure #1 {count}");
 
                 if ((b[63] & 1) != 0)
                 {
@@ -691,24 +666,41 @@ namespace curve25519Tests
                 {
                     msg[count % MSG_LEN] ^= 1;
                 }
-                Assert.AreNotEqual(0, uxeddsa.uxed25519_verify(sha512provider, signature, pubkey, msg, MSG_LEN), $"UXEdDSA verify failure #2 {count}");
+                Assert.AreNotEqual(0, vxeddsa.vxed25519_verify(sha512provider, vrf_out, signature, pubkey, msg, MSG_LEN), $"VXEdDSA verify failure #2 {count}");
+
+                //if (count == 10000)
+                //    print_bytes("10K VXEdDSA", signature, 96);
+                //if (count == 100000)
+                //    print_bytes("100K VXEdDSA", signature, 96);
+                //if (count == 1000000)
+                //    print_bytes("1M VXEdDSA", signature, 96);
+                //if (count == 10000000)
+                //    print_bytes("10M VXEdDSA", signature, 96);
+                //if (count == 100000000)
+                //    print_bytes("100M VXEdDSA", signature, 96);
 
                 if (count == 10000)
                 {
-                    CollectionAssert.AreEqual(signature_10k_correct, signature, $"UXEdDSA 10K doesn't match {count}");
+                    CollectionAssert.AreEqual(signature_10k_correct, signature, $"VXEdDSA 10K doesn't match {count}");
                 }
                 if (count == 100000)
                 {
-                    //utility.print_bytes("100K UXEdDSA", signature, 64);
+                    CollectionAssert.AreEqual(signature_100k_correct, signature, $"VXEdDSA 100K doesn't match {count}");
                 }
                 if (count == 1000000)
                 {
-                    //utility.print_bytes("1M UXEdDSA", signature, 64);
+                    CollectionAssert.AreEqual(signature_1m_correct, signature, $"VXEdDSA 1m doesn't match {count}");
                 }
                 if (count == 10000000)
                 {
-                    //utility.print_bytes("10M UXEdDSA", signature, 64);
+                    CollectionAssert.AreEqual(signature_10m_correct, signature, $"VXEdDSA 10m doesn't match {count}");
                 }
+                /*
+                if (count == 100000000) {
+                    if (memcmp(signature, signature_100m_correct, 96) != 0)
+                        ERROR("VXEDDSA 100m doesn't match %d\n", count);
+                }
+                */
             }
         }
     }

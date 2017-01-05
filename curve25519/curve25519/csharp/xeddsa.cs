@@ -59,6 +59,7 @@ namespace org.whispersystems.curve25519.csharp
             Array.Copy(sigbuf, 0, signature_out, 0, 64);
 
             Zeroize.zeroize(a, 32);
+            Zeroize.zeroize(aneg, 32);
             return 0;
         }
 
@@ -67,7 +68,7 @@ namespace org.whispersystems.curve25519.csharp
             int[] u = new int[10];
             int[] y = new int[10];
             byte[] ed_pubkey = new byte[32];
-            long some_retval = 0;
+            byte[] strict = new byte[32];
             byte[] verifybuf = new byte[crypto_additions.MAX_MSG_LEN + 64]; /* working buffer */
             byte[] verifybuf2 = new byte[crypto_additions.MAX_MSG_LEN + 64]; /* working buffer #2 */
 
@@ -83,6 +84,11 @@ namespace org.whispersystems.curve25519.csharp
              * NOTE: u=-1 is converted to y=0 since fe_invert is mod-exp
              */
             Fe_frombytes.fe_frombytes(u, curve25519_pubkey);
+            Fe_tobytes.fe_tobytes(strict, u);
+            if (Crypto_verify_32.crypto_verify_32(strict, curve25519_pubkey) != 0)
+            {
+                return 0;
+            }
             Fe_montx_to_edy.fe_montx_to_edy(y, u);
             Fe_tobytes.fe_tobytes(ed_pubkey, y);
 
@@ -93,9 +99,8 @@ namespace org.whispersystems.curve25519.csharp
             /* The below call has a strange API: */
             /* verifybuf = R || S || message */
             /* verifybuf2 = internal to next call gets a copy of verifybuf, S gets
-             * replaced with pubkey for hashing, then the whole thing gets zeroized
-             * (if bad sig), or contains a copy of msg (good sig) */
-            return open_modified.crypto_sign_open_modified(sha512provider, verifybuf2, some_retval, verifybuf, 64 + msg_len, ed_pubkey);
+             replaced with pubkey for hashing*/
+            return open_modified.crypto_sign_open_modified(sha512provider, verifybuf2, verifybuf, 64 + msg_len, ed_pubkey);
         }
     }
 }

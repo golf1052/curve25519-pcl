@@ -19,16 +19,16 @@ namespace org.whispersystems.curve25519.csharp
 {
     public class Sc_neg
     {
-        /* L = order of base point = 2^252 + 27742317777372353535851937790883648493 */
+        /* l = order of base point = 2^252 + 27742317777372353535851937790883648493 */
 
         /*
-         * static unsigned char L[32] = {0xed, 0xd3, 0xf5, 0x5c, 0x1a, 0x63, 0x12, 0x58,
+         * static unsigned char l[32] = {0xed, 0xd3, 0xf5, 0x5c, 0x1a, 0x63, 0x12, 0x58,
          *                               0xd6, 0x9c, 0xf7, 0xa2, 0xde, 0xf9, 0xde, 0x14,
          *                               0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
          *                               0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0, 0x10};
          */
 
-        private static byte[] Lminus1 = new byte[]
+        private static byte[] lminus1 = new byte[]
         {
             0xec, 0xd3, 0xf5, 0x5c, 0x1a, 0x63, 0x12, 0x58,
             0xd6, 0x9c, 0xf7, 0xa2, 0xde, 0xf9, 0xde, 0x14,
@@ -36,12 +36,12 @@ namespace org.whispersystems.curve25519.csharp
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10
         };
 
-        /* aneg = -a (mod L) */
+        /* b = -a (mod l) */
         public static void sc_neg(byte[] b, byte[] a)
         {
             byte[] zero = new byte[32];
             //memset(zero, 0, 32);
-            Sc_muladd.sc_muladd(b, Lminus1, a, zero); /* b = (-1)a + 0   (mod L) */
+            Sc_muladd.sc_muladd(b, lminus1, a, zero); /* b = (-1)a + 0   (mod l) */
         }
     }
 }

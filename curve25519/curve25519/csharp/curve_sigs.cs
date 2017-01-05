@@ -1,5 +1,5 @@
 ﻿/** 
- * Copyright (C) 2016 langboost, golf1052
+ * Copyright (C) 2017 langboost, golf1052
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,7 +55,6 @@ namespace org.whispersystems.curve25519.csharp
             int[] u = new int[10];
             int[] y = new int[10];
             byte[] ed_pubkey = new byte[32];
-            long some_retval = 0;
             byte[] verifybuf = new byte[msg_len + 64]; /* working buffer */
             byte[] verifybuf2 = new byte[msg_len + 64]; /* working buffer #2 */
 
@@ -87,7 +86,7 @@ namespace org.whispersystems.curve25519.csharp
             /* verifybuf2 = java to next call gets a copy of verifybuf, S gets
                replaced with pubkey for hashing, then the whole thing gets zeroized
                (if bad sig), or contains a copy of msg (good sig) */
-            return open_modified.crypto_sign_open_modified(sha512provider, verifybuf2, some_retval, verifybuf, 64 + msg_len, ed_pubkey);
+            return open_modified.crypto_sign_open_modified(sha512provider, verifybuf2, verifybuf, 64 + msg_len, ed_pubkey);
         }
     }
 }

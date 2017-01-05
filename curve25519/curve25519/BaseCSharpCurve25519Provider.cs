@@ -1,5 +1,5 @@
 ﻿/** 
- * Copyright (C) 2016 langboost, golf1052
+ * Copyright (C) 2017 langboost, golf1052
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -108,7 +108,7 @@ namespace org.whispersystems.curve25519
         {
             byte[] signature = new byte[96];
 
-            if (uxeddsa.uxed25519_sign(sha512provider, signature, privateKey, message, message.Length, random) != 0)
+            if (vxeddsa.vxed25510_sign(sha512provider, signature, privateKey, message, message.Length, random) != 0)
             {
                 throw new ArgumentException("Signature failed!");
             }
@@ -116,9 +116,19 @@ namespace org.whispersystems.curve25519
             return signature;
         }
 
-        public override bool verifyUniqueSignature(byte[] publicKey, byte[] message, byte[] signature)
+        public override byte[] verifyUniqueSignature(byte[] publicKey, byte[] message, byte[] signature)
         {
-            return uxeddsa.uxed25519_verify(sha512provider, signature, publicKey, message, message.Length) == 0;
+            byte[] vrf = new byte[32];
+            int result = vxeddsa.vxed25519_verify(sha512provider, vrf, signature, publicKey, message, message.Length);
+
+            if (result == 0)
+            {
+                return vrf;
+            }
+            else
+            {
+                throw new UniqueSignatureVerificationFailedException("Invalid signature");
+            }
         }
 
         public override byte[] getRandom(int length)

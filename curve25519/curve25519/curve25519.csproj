@@ -71,10 +71,13 @@
     <Compile Include="csharp\ge_cached.cs" />
     <Compile Include="csharp\ge_double_scalarmult.cs" />
     <Compile Include="csharp\ge_frombytes.cs" />
+    <Compile Include="csharp\ge_isneutral.cs" />
     <Compile Include="csharp\ge_is_small_order.cs" />
     <Compile Include="csharp\ge_madd.cs" />
     <Compile Include="csharp\ge_montx_to_p2.cs" />
+    <Compile Include="csharp\ge_montx_to_p3.cs" />
     <Compile Include="csharp\ge_msub.cs" />
+    <Compile Include="csharp\ge_neg.cs" />
     <Compile Include="csharp\ge_p1p1.cs" />
     <Compile Include="csharp\ge_p1p1_to_p2.cs" />
     <Compile Include="csharp\ge_p1p1_to_p3.cs" />
@@ -96,6 +99,7 @@
     <Compile Include="csharp\ge_precomp_base_8_15.cs" />
     <Compile Include="csharp\ge_scalarmult.cs" />
     <Compile Include="csharp\ge_scalarmult_base.cs" />
+    <Compile Include="csharp\ge_scalarmult_cofactor.cs" />
     <Compile Include="csharp\ge_sub.cs" />
     <Compile Include="csharp\ge_tobytes.cs" />
     <Compile Include="csharp\keygen.cs" />
@@ -113,6 +117,9 @@
     <Compile Include="csharp\usign_modified.cs" />
     <Compile Include="csharp\utility.cs" />
     <Compile Include="csharp\uxeddsa.cs" />
+    <Compile Include="csharp\vopen_modified.cs" />
+    <Compile Include="csharp\vsign_modified.cs" />
+    <Compile Include="csharp\vxeddsa.cs" />
     <Compile Include="csharp\xeddsa.cs" />
     <Compile Include="csharp\zeroize.cs" />
     <Compile Include="Curve25519.cs" />
@@ -125,6 +132,7 @@
     <Compile Include="pcl\IPclCloneable.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SecureRandomProvider.cs" />
+    <Compile Include="UniqueSignatureVerificationFailedException.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="bc-crypto\README.md" />

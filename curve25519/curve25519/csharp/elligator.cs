@@ -1,5 +1,5 @@
 ﻿/** 
- * Copyright (C) 2016 golf1052
+ * Copyright (C) 2017 golf1052
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -90,8 +90,7 @@ namespace org.whispersystems.curve25519.csharp
             int[] h = new int[10];
             int[] u = new int[10];
             byte sign_bit;
-            Ge_p2 p2 = new Ge_p2();
-            Ge_p1p1 p1p1 = new Ge_p1p1();
+            Ge_p3 p3 = new Ge_p3();
 
             sha512provider.calculateDigest(hash, iIn, in_len);
 
@@ -101,43 +100,43 @@ namespace org.whispersystems.curve25519.csharp
             Fe_frombytes.fe_frombytes(h, hash);
             elligator(u, h);
 
-            Ge_montx_to_p2.ge_montx_to_p2(p2, u, sign_bit);
-
-            /* multiply by 8 (cofactor) to map onto the main subgroup,
-             * or map small-order points to the neutral element
-             * (the latter prevents leaking r mod (2, 4, 8) via U) */
-            Ge_p2_dbl.ge_p2_dbl(p1p1, p2);
-            Ge_p1p1_to_p2.ge_p1p1_to_p2(p2, p1p1);
-
-            Ge_p2_dbl.ge_p2_dbl(p1p1, p2);
-            Ge_p1p1_to_p2.ge_p1p1_to_p2(p2, p1p1);
-
-            Ge_p2_dbl.ge_p2_dbl(p1p1, p2);
-            Ge_p1p1_to_p3.ge_p1p1_to_p3(p, p1p1);
+            Ge_montx_to_p3.ge_montx_to_p3(p3, u, sign_bit);
+            Ge_scalarmult_cofactor.ge_scalarmult_cofactor(p, p3);
         }
 
-        public static void calculate_Bu(ISha512 sha512provider, Ge_p3 Bu, byte[] buf, byte[] msg, int msg_len)
+        public static void calculate_Bv(ISha512 sha512provider,
+            Ge_p3 Bv,
+            byte[] buf,
+            byte[] A,
+            byte[] msg, int msg_len)
         {
             int count;
 
-            /* Calculate SHA512(label(2) || msg) */
+            /* Calculate SHA512(label(2) || A || msg) */
             buf[0] = 0xFD;
             for (count = 1; count < 32; count++)
             {
                 buf[count] = 0xFF;
             }
-            Array.Copy(msg, 0, buf, 32, msg_len);
+            Array.Copy(A, 0, buf, 32, 32);
+            Array.Copy(msg, 0, buf, 64, msg_len);
 
-            hash_to_point(sha512provider, Bu, buf, 32 + msg_len);
+            hash_to_point(sha512provider, Bv, buf, 64 + msg_len);
         }
 
-        public static void calculate_Bu_and_U(ISha512 sha512provider, Ge_p3 Bu, byte[] U, byte[] buf, byte[] a, byte[] msg, int msg_len)
+        public static void calculate_Bv_and_V(ISha512 sha512provider,
+            Ge_p3 Bv,
+            byte[] V,
+            byte[] buf,
+            byte[] a,
+            byte[] A,
+            byte[] msg, int msg_len)
         {
             Ge_p3 p3 = new Ge_p3();
 
-            calculate_Bu(sha512provider, Bu, buf, msg, msg_len);
-            Ge_scalarmult.ge_scalarmult(p3, a, Bu);
-            Ge_p3_tobytes.ge_p3_tobytes(U, p3);
+            calculate_Bv(sha512provider, Bv, buf, A, msg, msg_len);
+            Ge_scalarmult.ge_scalarmult(p3, a, Bv);
+            Ge_p3_tobytes.ge_p3_tobytes(V, p3);
         }
     }
 }

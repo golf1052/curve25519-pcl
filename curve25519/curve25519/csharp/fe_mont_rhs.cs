@@ -1,5 +1,5 @@
 ﻿/** 
- * Copyright (C) 2016 golf1052
+ * Copyright (C) 2017 golf1052
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,8 +27,7 @@
             int[] Au = new int[10];
             int[] inner = new int[10];
 
-            Fe_0.fe_0(one);
-            one[0] = 1;                         /* 1 */
+            Fe_1.fe_1(one);
             Fe_0.fe_0(A);
             A[0] = 486662;                      /* A = 486662 */
 
