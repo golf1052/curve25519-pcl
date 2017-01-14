@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>golf1052, langboost</authors>
+    <owners>golf1052, langboost</owners>
+    <licenseUrl>https://github.com/golf1052/curve25519-pcl/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/golf1052/curve25519-pcl</projectUrl>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <description>Portable C# implementation of curve25519 (and ed25519 for signing/verification) based on https://github.com/WhisperSystems/curve25519-java</description>
+    <releaseNotes>Updated to 0.3.0 version of curve25519-java.</releaseNotes>
+    <copyright>Copyright 2017</copyright>
+    <tags>curve25519 signal</tags>
+  </metadata>
+</package>
