@@ -1,4 +1,7 @@
 # curve25519-pcl
+
+## This has been superseded by [curve25519-dotnet](https://github.com/signal-csharp/curve25519-dotnet)
+
 Portable C# implementation of curve25519 (and ed25519 for signing/verification) based on https://github.com/WhisperSystems/curve25519-java.
 
 ## Usage
